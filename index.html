@@ -2,79 +2,88 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>City Phone - Sistema de Gestión</title>
-    
-    <!-- Fuentes y estilos -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <title>City Phone - Sistema Integral 2026</title>
     <link rel="stylesheet" href="css/style.css">
-    
-    <!-- Librerías -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+    <div id="app-container">
+        <!-- Dashboard Resumen -->
+        <section id="dashboard" class="panel">
+            <h1>Dashboard</h1>
+            <div class="kpi-grid">
+                <div class="kpi">Venta Hoy: $<span id="val-hoy">0</span></div>
+                <div class="kpi">Venta Neta: $<span id="val-neta">0</span></div>
+                <div class="kpi">Venta Mes: $<span id="val-mes">0</span></div>
+                <div class="kpi">Bajo Stock: <span id="val-stock">0</span></div>
+            </div>
+        </section>
 
-    <div id="app">
-        <!-- 1. Tabla de Inventario -->
-        <section>
-            <h2>Inventario</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Stock</th>
-                        <th>Stock Min</th>
-                        <th>Precio</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-inventario">
-                    <!-- El JS llenará esto automáticamente -->
-                </tbody>
+        <!-- Ventas (POS) -->
+        <section id="ventas" class="panel">
+            <h2>Punto de Venta</h2>
+            <div class="pos-grid">
+                <div class="agregar-productos">
+                    <input type="text" id="input-producto" placeholder="Nombre del producto">
+                    <input type="number" id="input-precio" placeholder="Precio">
+                    <button onclick="agregarAlTicket()">Agregar</button>
+                </div>
+                <div class="ticket-actual">
+                    <h3>Ticket Actual</h3>
+                    <ul id="lista-ticket"></ul>
+                    <select id="medio-pago" onchange="calcularPago()">
+                        <option value="efectivo">Efectivo</option>
+                        <option value="debito">Débito (-1.21%)</option>
+                        <option value="credito">Crédito (-2.42%)</option>
+                        <option value="transferencia">Transferencia</option>
+                        <option value="mixto">Pago Mixto</option>
+                    </select>
+                    <button onclick="finalizarVenta()">Cobrar y Finalizar</button>
+                </div>
+            </div>
+            <table id="tabla-historial">
+                <thead><tr><th>Fecha</th><th>Detalle</th><th>Total</th><th>Acción</th></tr></thead>
+                <tbody id="cuerpo-historial"></tbody>
             </table>
         </section>
 
-        <!-- Sección de Productos Fallados -->
-<section>
-    <h2>Productos Fallados</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Producto</th>
-                <th>Motivo de Falla</th>
-                <th>Acciones</th>
-                <th>Costo</th>
-            </tr>
-        </thead>
-        <tbody id="tabla-fallados">
-            <!-- Aquí el JS dibujará los productos fallados -->
-        </tbody>
-    </table>
-</section>
-
-        <!-- 2. Sección de Servicios Técnicos -->
-        <section>
-            <h2>Servicios Técnicos</h2>
-            <div id="contenedor-servicios"></div>
-        </section>
-
-        <!-- 3. Sección de Promociones -->
-        <section>
-            <h2>Promociones</h2>
-            <div id="lista-promociones"></div>
-        </section>
-
-        <!-- 4. Modal para Calendario/Meses -->
-        <div id="modal-mes-dias" class="modal">
-            <div class="modal-content">
-                <!-- Contenido del modal -->
+        <!-- Gestión de Caja y Cierre Mensual -->
+        <section id="caja" class="panel">
+            <h2>Gestión de Caja</h2>
+            <div class="caja-info">
+                <p>Efectivo actual en caja: $<span id="efectivo-caja">0</span></p>
+                <p>Total gastos del mes: $<span id="total-gastos">0</span></p>
             </div>
-        </div>
+            <button id="btn-cierre-mes" onclick="abrirCierreMensual()">Cerrar Mes</button>
+            
+            <!-- Resumen de Cierre de Mes (Oculto hasta activar) -->
+            <div id="resumen-cierre" class="hidden">
+                <h3>Cierre de Mes y Resumen de Gastos</h3>
+                <div id="detalles-salidas"></div>
+                <p>Balance General: <span id="balance-final"></span></p>
+            </div>
+        </section>
+
+        <!-- Servicio Técnico -->
+        <section id="servicio-tecnico" class="panel">
+            <h2>Servicio Técnico</h2>
+            <button onclick="nuevaReparacion()">+ Nueva Reparación</button>
+            <button onclick="nuevaCotizacion()">+ Nueva Cotización</button>
+            <table id="tabla-tecnico">
+                <thead><tr><th>Cliente</th><th>Estado</th><th>Falla</th><th>Acción</th></tr></thead>
+                <tbody id="lista-tecnico"></tbody>
+            </table>
+        </section>
+
+        <!-- Gestión de Locales -->
+        <section id="gestion-locales" class="panel">
+            <h2>Préstamos de Locales</h2>
+            <table id="tabla-prestamos">
+                <thead><tr><th>Local</th><th>Detalle</th><th>Estado</th><th>Acción</th></tr></thead>
+                <tbody id="lista-prestamos"></tbody>
+            </table>
+        </section>
     </div>
 
-    <!-- Tu archivo JS corregido -->
     <script src="js/main.js"></script>
 </body>
 </html>
