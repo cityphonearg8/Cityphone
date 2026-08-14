@@ -1,5 +1,3 @@
-  });
-
   ticketActual = [];
   renderTicket();
   renderAll();
