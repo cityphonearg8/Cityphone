@@ -1,4 +1,4 @@
-
+document.addEventListener('DOMContentLoaded', () => {
 function anularVenta(id){
   ventas = ventas.filter(v => v.id !== id);
   renderAll();
@@ -355,6 +355,7 @@ function showToast(msg){
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), 2200);
 }
+  });
 
 // Llamada para inicializar la interfaz al cargar
 renderAll();
