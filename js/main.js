@@ -13,6 +13,30 @@ let servicioCotizaciones = [];
 let promocionesLocal = [];
 let ticketActual = [];
 
+// --- NAVEGACIÓN ENTRE PESTAÑAS (TABS) ---
+function switchTab(tabId) {
+    // Ocultar todas las secciones con la clase .view
+    const vistas = document.querySelectorAll('.view');
+    vistas.forEach(vista => {
+        vista.classList.remove('active');
+    });
+
+    // Mostrar la sección seleccionada
+    const vistaActiva = document.getElementById(tabId);
+    if (vistaActiva) {
+        vistaActiva.classList.add('active');
+    }
+
+    // Actualizar el estado activo en los botones del menú lateral
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('onclick') && item.getAttribute('onclick').includes(tabId)) {
+            item.classList.add('active');
+        }
+    });
+}
+
 // --- INICIALIZAR CARGA DESDE LA BASE DE DATOS ---
 async function inicializarDatos() {
   try {
@@ -61,17 +85,17 @@ function agregarAlTicket() {
 
 function renderTicket() {
   const lista = document.getElementById('lista-ticket');
-  const totalSpan = document.getElementById('total-ticket');
   let total = 0;
   
   if (!lista) return;
 
   lista.innerHTML = ticketActual.map((item, index) => {
     total += item.precio;
-    return `<li>${item.nombre} - $${item.precio.toLocaleString()} <button onclick="eliminarDelTicket(${index})">❌</button></li>`;
+    return `<li style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line);">
+              <span>${item.nombre} - <strong>$${item.precio.toLocaleString()}</strong></span>
+              <button class="btn-danger btn-sm" onclick="eliminarDelTicket(${index})">❌</button>
+            </li>`;
   }).join('');
-  
-  if(totalSpan) totalSpan.textContent = total.toLocaleString();
 }
 
 function eliminarDelTicket(index) {
@@ -85,7 +109,7 @@ async function finalizarVenta() {
   const medio = document.getElementById('medio-pago').value;
   let total = ticketActual.reduce((acc, item) => acc + item.precio, 0);
 
-  if(medio === 'Mixto') {
+  if(medio === 'mixto') {
     let efec = parseFloat(prompt("Monto en Efectivo:")) || 0;
     showToast(`Venta mixta: $${efec} efec / $${total - efec} tarjeta`);
   }
@@ -158,6 +182,16 @@ async function sacarEfectivoCaja(){
   showToast('Salida registrada en la nube');
 }
 
+function abrirCierreMensual() {
+  const resumen = document.getElementById('resumen-cierre');
+  if (resumen) {
+    resumen.style.display = 'block';
+    const totalGastosMes = gastosCaja.reduce((acc, g) => acc + g.monto, 0);
+    const totalVentasMes = ventas.reduce((acc, v) => acc + v.total, 0);
+    document.getElementById('balance-final').textContent = `$${(totalVentasMes - totalGastosMes).toLocaleString()}`;
+  }
+}
+
 async function addServiceIngreso(){
   const nombre = document.getElementById('srv-nombre').value.trim();
   const motivo = document.getElementById('srv-motivo').value.trim();
@@ -205,45 +239,77 @@ async function actualizarEstadoServicio(id, nuevoEstado) {
   }
 }
 
+function nuevaReparacion() {
+  // Placeholder para la acción de nueva reparación
+  const cliente = prompt("Nombre del cliente:");
+  const falla = prompt("Motivo de ingreso / Falla:");
+  const precio = parseFloat(prompt("Precio de reparación:")) || 0;
+  if(cliente && falla) {
+    document.getElementById('srv-nombre') ? document.getElementById('srv-nombre').value = cliente : null;
+    addServiceIngreso();
+  }
+}
+
+function nuevaCotizacion() {
+  alert("Función de cotización rápida lista para configurar.");
+}
+
 // --- RENDERIZADO GENERAL ---
 function renderAll() {
-  const tablaHistorial = document.getElementById('tabla-historial-ventas');
+  // Historial de ventas en POS
+  const tablaHistorial = document.getElementById('tabla-historial');
   if (tablaHistorial) {
-    tablaHistorial.innerHTML = ventas.map(v => `
-      <tr>
-        <td>${new Date(v.fecha).toLocaleTimeString()}</td>
-        <td><span class="badge ok">${v.medio}</span></td>
-        <td class="num">$${v.total.toLocaleString()}</td>
-        <td><button onclick="anularVenta(${v.id})">Anular</button></td>
-      </tr>
-    `).join('');
+    const cuerpo = document.getElementById('cuerpo-historial');
+    if(cuerpo) {
+      cuerpo.innerHTML = ventas.map(v => `
+        <tr>
+          <td>${new Date(v.fecha).toLocaleTimeString()}</td>
+          <td>${v.items ? v.items.map(i => i.nombre).join(', ') : 'Venta directa'}</td>
+          <td class="num">$${v.total.toLocaleString()}</td>
+          <td><button class="btn-danger btn-sm" onclick="anularVenta(${v.id})">Anular</button></td>
+        </tr>
+      `).join('');
+    }
   }
 
+  // Cálculos para Dashboard
+  const totalHistorico = ventas.reduce((a,v)=>a+v.total, 0);
   const totalHoy = ventas.filter(v => new Date(v.fecha).toDateString() === new Date().toDateString()).reduce((a, v) => a + v.total, 0);
+  const totalMes = ventas.reduce((a, v) => a + v.total, 0); // Ajustable si filtras por mes actual
+  
   const totalRetiros = gastosCaja.reduce((a, g) => a + g.monto, 0);
-  const efectivoEnCaja = (ventas.filter(v => v.medio === 'Efectivo').reduce((a, v) => a + v.total, 0)) - totalRetiros;
+  const efectivoEnCaja = (ventas.filter(v => v.medio === 'efectivo').reduce((a, v) => a + v.total, 0)) - totalRetiros;
 
-  const dashVentaTotal = document.getElementById('dash-venta-total');
-  if (dashVentaTotal) dashVentaTotal.textContent = `$${ventas.reduce((a,v)=>a+v.total, 0).toLocaleString()}`;
+  // Actualizar elementos del Dashboard
+  const valHistorica = document.getElementById('val-historica');
+  if (valHistorica) valHistorica.textContent = totalHistorico.toLocaleString();
 
-  const dashVentaDiaria = document.getElementById('dash-venta-diaria');
-  if (dashVentaDiaria) dashVentaDiaria.textContent = `$${totalHoy.toLocaleString()}`;
+  const valHoy = document.getElementById('val-hoy');
+  if (valHoy) valHoy.textContent = totalHoy.toLocaleString();
 
-  const cajaStatSaldo = document.getElementById('caja-stat-saldo');
-  if (cajaStatSaldo) cajaStatSaldo.textContent = `$${efectivoEnCaja.toLocaleString()}`;
+  const valMes = document.getElementById('val-mes');
+  if (valMes) valMes.textContent = totalMes.toLocaleString();
+
+  const efectivoCaja = document.getElementById('efectivo-caja');
+  if (efectivoCaja) efectivoCaja.textContent = efectivoEnCaja.toLocaleString();
+
+  const totalGastos = document.getElementById('total-gastos');
+  if (totalGastos) totalGastos.textContent = totalRetiros.toLocaleString();
+
+  renderServiciosTecnicos();
 }
 
 function renderServiciosTecnicos(){
-  const tbodyIng = document.getElementById('tabla-servicios-ingreso');
+  const tbodyIng = document.getElementById('lista-tecnico');
   if (!tbodyIng) return;
 
   tbodyIng.innerHTML = servicioIngresos.map(i => `
     <tr>
       <td>${i.nombre}</td>
+      <td><span class="badge ${i.estado === 'Ingresado' ? 'low' : 'ok'}">${i.estado}</span></td>
       <td>${i.motivo}</td>
-      <td class="num">$${i.precio.toLocaleString()}</td>
       <td>
-        <select onchange="actualizarEstadoServicio(${i.id}, this.value)">
+        <select class="btn-sm" onchange="actualizarEstadoServicio(${i.id}, this.value)">
           <option value="Ingresado" ${i.estado === 'Ingresado' ? 'selected' : ''}>Ingresado</option>
           <option value="Listo para retirar" ${i.estado === 'Listo para retirar' ? 'selected' : ''}>Listo</option>
         </select>
@@ -253,8 +319,14 @@ function renderServiciosTecnicos(){
 }
 
 function showToast(msg){
-  const t = document.getElementById('toast');
-  if (!t) return;
+  let t = document.getElementById('toast');
+  if (!t) {
+    // Crear el elemento toast dinámicamente si no existe en el HTML
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.className = 'toast';
+    document.body.appendChild(t);
+  }
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), 2200);
