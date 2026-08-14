@@ -11,46 +11,124 @@
     <div id="app">
         <!-- Barra Lateral / Menú de Navegación -->
         <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2>City Phone</h2>
-                <span id="fecha-actual" class="date-display">VIE, 14 AGO 2026</span>
+            <div style="margin-bottom: 20px;">
+                <h2 style="font-size: 20px; font-weight: 700; color: #FFFFFF; margin-bottom: 4px;">City Phone</h2>
+                <span id="fecha-actual" style="font-size: 11px; color: var(--muted); font-family: var(--font-mono); text-transform: uppercase;">VIE, 14 AGO 2026</span>
             </div>
-            <nav class="sidebar-nav">
-                <button class="nav-btn active" onclick="switchTab('dashboard')">Dashboard</button>
-                <button class="nav-btn" onclick="switchTab('ventas')">Ventas</button>
-                <button class="nav-btn" onclick="switchTab('caja')">Caja</button>
-                <button class="nav-btn sub-menu" onclick="switchTab('inventario')">Inventario</button>
-                <button class="nav-btn" onclick="switchTab('servicio-tecnico')">Servicio Técnico</button>
-                <button class="nav-btn" onclick="switchTab('gestion-locales')">Gestión de Locales</button>
-                <button class="nav-btn" onclick="switchTab('meses-reportes')">Meses y Reportes</button>
+            
+            <nav style="display: flex; flex-direction: column; gap: 4px;">
+                <a class="nav-item active" onclick="switchTab('dashboard')">
+                    <span class="dot"></span> Dashboard
+                </a>
+                <a class="nav-item" onclick="switchTab('ventas')">
+                    <span class="dot" style="background: transparent; box-shadow: none;"></span> Ventas
+                </a>
+                <a class="nav-item" onclick="switchTab('caja')">
+                    <span class="dot" style="background: transparent; box-shadow: none;"></span> Caja
+                </a>
+                <a class="nav-item" onclick="switchTab('inventario')" style="padding-left: 28px;">
+                    Inventario
+                </a>
+                <a class="nav-item" onclick="switchTab('servicio-tecnico')">
+                    <span class="dot" style="background: transparent; box-shadow: none;"></span> Servicio Técnico
+                </a>
+                <a class="nav-item" onclick="switchTab('gestion-locales')">
+                    <span class="dot" style="background: transparent; box-shadow: none;"></span> Gestión de Locales
+                </a>
+                <a class="nav-item" onclick="switchTab('meses-reportes')">
+                    <span class="dot" style="background: transparent; box-shadow: none;"></span> Meses y Reportes
+                </a>
             </nav>
         </aside>
 
         <!-- Contenedor Principal de Vistas -->
-        <main class="main-content">
+        <main>
             <!-- Dashboard Resumen -->
             <section id="dashboard" class="panel view active">
-                <h1>Dashboard</h1>
-                <div class="kpi-grid">
-                    <div class="kpi">Venta Hoy: $<span id="val-hoy">0</span></div>
-                    <div class="kpi">Venta Neta: $<span id="val-neta">0</span></div>
-                    <div class="kpi">Venta Mes: $<span id="val-mes">0</span></div>
-                    <div class="kpi">Bajo Stock: <span id="val-stock">0</span></div>
+                <div class="page-header-row">
+                    <div>
+                        <h1>Dashboard General</h1>
+                        <p class="page-sub">Visión global del negocio: Ventas totales, diarias, mensuales y estado general.</p>
+                    </div>
+                </div>
+
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Venta Total Histórica</div>
+                        <div class="stat-value primary">$<span id="val-historica">0</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Ventas de Hoy</div>
+                        <div class="stat-value copper">$<span id="val-hoy">0</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Ventas del Mes</div>
+                        <div class="stat-value teal">$<span id="val-mes">0</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Productos Bajo Stock</div>
+                        <div class="stat-value red"><span id="val-stock">0</span></div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px;">
+                    <div class="panel" style="margin-bottom: 0;">
+                        <h2>Resumen por Medio de Pago (Mes)</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Medio</th>
+                                    <th class="num">Monto Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Efectivo</td>
+                                    <td class="num">$0</td>
+                                </tr>
+                                <tr>
+                                    <td>Transferencia</td>
+                                    <td class="num">$0</td>
+                                </tr>
+                                <tr>
+                                    <td>Débito / Crédito / Mixto</td>
+                                    <td class="num">$0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="panel" style="margin-bottom: 0;">
+                        <h2>Acciones Rápidas</h2>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <button class="btn-primary" onclick="switchTab('ventas')">Ir a Panel de Ventas</button>
+                            <button class="btn-secondary" onclick="switchTab('inventario')">Revisar Inventario</button>
+                            <button class="btn-secondary">Ver Lista de Compras</button>
+                        </div>
+                    </div>
                 </div>
             </section>
 
             <!-- Ventas (POS) -->
             <section id="ventas" class="panel view">
-                <h2>Punto de Venta</h2>
-                <div class="pos-grid">
-                    <div class="agregar-productos">
-                        <input type="text" id="input-producto" placeholder="Nombre del producto">
-                        <input type="number" id="input-precio" placeholder="Precio">
-                        <button onclick="agregarAlTicket()">Agregar</button>
+                <h1>Punto de Venta</h1>
+                <p class="page-sub" style="margin-bottom: 20px;">Carga rápida de productos y cobros.</p>
+                <div class="form-grid" style="margin-bottom: 20px;">
+                    <div class="field">
+                        <label>Nombre del producto</label>
+                        <input type="text" id="input-producto" placeholder="Ej. Funda Silicona iPhone">
                     </div>
-                    <div class="ticket-actual">
-                        <h3>Ticket Actual</h3>
-                        <ul id="lista-ticket"></ul>
+                    <div class="field">
+                        <label>Precio</label>
+                        <input type="number" id="input-precio" placeholder="0">
+                    </div>
+                    <button class="btn-primary" onclick="agregarAlTicket()">Agregar</button>
+                </div>
+                <div class="panel">
+                    <h2>Ticket Actual</h2>
+                    <ul id="lista-ticket" style="list-style: none; margin-bottom: 15px;"></ul>
+                    <div class="field" style="max-width: 300px; margin-bottom: 15px;">
+                        <label>Medio de Pago</label>
                         <select id="medio-pago" onchange="calcularPago()">
                             <option value="efectivo">Efectivo</option>
                             <option value="debito">Débito (-1.21%)</option>
@@ -58,44 +136,57 @@
                             <option value="transferencia">Transferencia</option>
                             <option value="mixto">Pago Mixto</option>
                         </select>
-                        <button onclick="finalizarVenta()">Cobrar y Finalizar</button>
                     </div>
+                    <button class="btn-success" onclick="finalizarVenta()">Cobrar y Finalizar</button>
                 </div>
-                <table id="tabla-historial">
-                    <thead><tr><th>Fecha</th><th>Detalle</th><th>Total</th><th>Acción</th></tr></thead>
+                <table id="tabla-historial" style="margin-top: 20px;">
+                    <thead><tr><th>Fecha</th><th>Detalle</th><th class="num">Total</th><th>Acción</th></tr></thead>
                     <tbody id="cuerpo-historial"></tbody>
                 </table>
             </section>
 
-            <!-- Gestión de Caja y Cierre Mensual -->
+            <!-- Gestión de Caja -->
             <section id="caja" class="panel view">
-                <h2>Gestión de Caja</h2>
-                <div class="caja-info">
-                    <p>Efectivo actual en caja: $<span id="efectivo-caja">0</span></p>
-                    <p>Total gastos del mes: $<span id="total-gastos">0</span></p>
+                <h1>Gestión de Caja</h1>
+                <p class="page-sub" style="margin-bottom: 20px;">Control de efectivo y cierres.</p>
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Efectivo Actual en Caja</div>
+                        <div class="stat-value copper">$<span id="efectivo-caja">0</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Gastos del Mes</div>
+                        <div class="stat-value red">$<span id="total-gastos">0</span></div>
+                    </div>
                 </div>
-                <button id="btn-cierre-mes" onclick="abrirCierreMensual()">Cerrar Mes</button>
+                <button class="btn-primary" id="btn-cierre-mes" onclick="abrirCierreMensual()">Cerrar Mes</button>
                 
-                <!-- Resumen de Cierre de Mes (Oculto hasta activar) -->
-                <div id="resumen-cierre" class="hidden">
-                    <h3>Cierre de Mes y Resumen de Gastos</h3>
+                <div id="resumen-cierre" class="panel" style="margin-top: 20px; display: none;">
+                    <h2>Cierre de Mes y Resumen de Gastos</h2>
                     <div id="detalles-salidas"></div>
-                    <p>Balance General: <span id="balance-final"></span></p>
+                    <p style="margin-top: 10px; font-weight: 600;">Balance General: <span id="balance-final" style="font-family: var(--font-mono);"></span></p>
                 </div>
             </section>
 
             <!-- Inventario -->
             <section id="inventario" class="panel view">
-                <h2>Inventario de Productos</h2>
-                <p>Gestión de stock y mercadería.</p>
+                <h1>Inventario de Productos</h1>
+                <p class="page-sub">Gestión de stock y mercadería de City Phone.</p>
             </section>
 
             <!-- Servicio Técnico -->
             <section id="servicio-tecnico" class="panel view">
-                <h2>Servicio Técnico</h2>
-                <button onclick="nuevaReparacion()">+ Nueva Reparación</button>
-                <button onclick="nuevaCotizacion()">+ Nueva Cotización</button>
-                <table id="tabla-tecnico">
+                <div class="page-header-row">
+                    <div>
+                        <h1>Servicio Técnico</h1>
+                        <p class="page-sub">Seguimiento de reparaciones y presupuestos.</p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-primary" onclick="nuevaReparacion()">+ Nueva Reparación</button>
+                        <button class="btn-secondary" onclick="nuevaCotizacion()">+ Nueva Cotización</button>
+                    </div>
+                </div>
+                <table>
                     <thead><tr><th>Cliente</th><th>Estado</th><th>Falla</th><th>Acción</th></tr></thead>
                     <tbody id="lista-tecnico"></tbody>
                 </table>
@@ -103,8 +194,9 @@
 
             <!-- Gestión de Locales -->
             <section id="gestion-locales" class="panel view">
-                <h2>Préstamos de Locales</h2>
-                <table id="tabla-prestamos">
+                <h1>Préstamos de Locales</h1>
+                <p class="page-sub" style="margin-bottom: 20px;">Control de stock compartido entre sucursales.</p>
+                <table>
                     <thead><tr><th>Local</th><th>Detalle</th><th>Estado</th><th>Acción</th></tr></thead>
                     <tbody id="lista-prestamos"></tbody>
                 </table>
@@ -112,8 +204,8 @@
 
             <!-- Meses y Reportes -->
             <section id="meses-reportes" class="panel view">
-                <h2>Meses y Reportes</h2>
-                <p>Historial de cierres anteriores y estadísticas financieras.</p>
+                <h1>Meses y Reportes</h1>
+                <p class="page-sub">Historial de cierres anteriores y estadísticas financieras.</p>
             </section>
         </main>
     </div>
