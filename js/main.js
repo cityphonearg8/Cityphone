@@ -1,5 +1,5 @@
 let inventario = []; // Definimos la variable globalmente para que todas las funciones la reconozcan
-document.addEventListener('DOMContentLoaded', () => {
+
 function anularVenta(id){
   ventas = ventas.filter(v => v.id !== id);
   renderAll();
@@ -356,7 +356,11 @@ function showToast(msg){
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), 2200);
 }
-  });
+  window.onload = function() {
+    // Aquí pon la función que carga tus datos inicialmente
+    // Si usas renderAll(), ponla aquí:
+    renderAll();
+};
 
 // Llamada para inicializar la interfaz al cargar
 renderAll();
