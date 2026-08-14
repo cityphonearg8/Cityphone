@@ -8,82 +8,114 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div id="app-container">
-        <!-- Dashboard Resumen -->
-        <section id="dashboard" class="panel">
-            <h1>Dashboard</h1>
-            <div class="kpi-grid">
-                <div class="kpi">Venta Hoy: $<span id="val-hoy">0</span></div>
-                <div class="kpi">Venta Neta: $<span id="val-neta">0</span></div>
-                <div class="kpi">Venta Mes: $<span id="val-mes">0</span></div>
-                <div class="kpi">Bajo Stock: <span id="val-stock">0</span></div>
+    <div id="app">
+        <!-- Barra Lateral / Menú de Navegación -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>City Phone</h2>
+                <span id="fecha-actual" class="date-display">VIE, 14 AGO 2026</span>
             </div>
-        </section>
+            <nav class="sidebar-nav">
+                <button class="nav-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+                <button class="nav-btn" onclick="switchTab('ventas')">Ventas</button>
+                <button class="nav-btn" onclick="switchTab('caja')">Caja</button>
+                <button class="nav-btn sub-menu" onclick="switchTab('inventario')">Inventario</button>
+                <button class="nav-btn" onclick="switchTab('servicio-tecnico')">Servicio Técnico</button>
+                <button class="nav-btn" onclick="switchTab('gestion-locales')">Gestión de Locales</button>
+                <button class="nav-btn" onclick="switchTab('meses-reportes')">Meses y Reportes</button>
+            </nav>
+        </aside>
 
-        <!-- Ventas (POS) -->
-        <section id="ventas" class="panel">
-            <h2>Punto de Venta</h2>
-            <div class="pos-grid">
-                <div class="agregar-productos">
-                    <input type="text" id="input-producto" placeholder="Nombre del producto">
-                    <input type="number" id="input-precio" placeholder="Precio">
-                    <button onclick="agregarAlTicket()">Agregar</button>
+        <!-- Contenedor Principal de Vistas -->
+        <main class="main-content">
+            <!-- Dashboard Resumen -->
+            <section id="dashboard" class="panel view active">
+                <h1>Dashboard</h1>
+                <div class="kpi-grid">
+                    <div class="kpi">Venta Hoy: $<span id="val-hoy">0</span></div>
+                    <div class="kpi">Venta Neta: $<span id="val-neta">0</span></div>
+                    <div class="kpi">Venta Mes: $<span id="val-mes">0</span></div>
+                    <div class="kpi">Bajo Stock: <span id="val-stock">0</span></div>
                 </div>
-                <div class="ticket-actual">
-                    <h3>Ticket Actual</h3>
-                    <ul id="lista-ticket"></ul>
-                    <select id="medio-pago" onchange="calcularPago()">
-                        <option value="efectivo">Efectivo</option>
-                        <option value="debito">Débito (-1.21%)</option>
-                        <option value="credito">Crédito (-2.42%)</option>
-                        <option value="transferencia">Transferencia</option>
-                        <option value="mixto">Pago Mixto</option>
-                    </select>
-                    <button onclick="finalizarVenta()">Cobrar y Finalizar</button>
+            </section>
+
+            <!-- Ventas (POS) -->
+            <section id="ventas" class="panel view">
+                <h2>Punto de Venta</h2>
+                <div class="pos-grid">
+                    <div class="agregar-productos">
+                        <input type="text" id="input-producto" placeholder="Nombre del producto">
+                        <input type="number" id="input-precio" placeholder="Precio">
+                        <button onclick="agregarAlTicket()">Agregar</button>
+                    </div>
+                    <div class="ticket-actual">
+                        <h3>Ticket Actual</h3>
+                        <ul id="lista-ticket"></ul>
+                        <select id="medio-pago" onchange="calcularPago()">
+                            <option value="efectivo">Efectivo</option>
+                            <option value="debito">Débito (-1.21%)</option>
+                            <option value="credito">Crédito (-2.42%)</option>
+                            <option value="transferencia">Transferencia</option>
+                            <option value="mixto">Pago Mixto</option>
+                        </select>
+                        <button onclick="finalizarVenta()">Cobrar y Finalizar</button>
+                    </div>
                 </div>
-            </div>
-            <table id="tabla-historial">
-                <thead><tr><th>Fecha</th><th>Detalle</th><th>Total</th><th>Acción</th></tr></thead>
-                <tbody id="cuerpo-historial"></tbody>
-            </table>
-        </section>
+                <table id="tabla-historial">
+                    <thead><tr><th>Fecha</th><th>Detalle</th><th>Total</th><th>Acción</th></tr></thead>
+                    <tbody id="cuerpo-historial"></tbody>
+                </table>
+            </section>
 
-        <!-- Gestión de Caja y Cierre Mensual -->
-        <section id="caja" class="panel">
-            <h2>Gestión de Caja</h2>
-            <div class="caja-info">
-                <p>Efectivo actual en caja: $<span id="efectivo-caja">0</span></p>
-                <p>Total gastos del mes: $<span id="total-gastos">0</span></p>
-            </div>
-            <button id="btn-cierre-mes" onclick="abrirCierreMensual()">Cerrar Mes</button>
-            
-            <!-- Resumen de Cierre de Mes (Oculto hasta activar) -->
-            <div id="resumen-cierre" class="hidden">
-                <h3>Cierre de Mes y Resumen de Gastos</h3>
-                <div id="detalles-salidas"></div>
-                <p>Balance General: <span id="balance-final"></span></p>
-            </div>
-        </section>
+            <!-- Gestión de Caja y Cierre Mensual -->
+            <section id="caja" class="panel view">
+                <h2>Gestión de Caja</h2>
+                <div class="caja-info">
+                    <p>Efectivo actual en caja: $<span id="efectivo-caja">0</span></p>
+                    <p>Total gastos del mes: $<span id="total-gastos">0</span></p>
+                </div>
+                <button id="btn-cierre-mes" onclick="abrirCierreMensual()">Cerrar Mes</button>
+                
+                <!-- Resumen de Cierre de Mes (Oculto hasta activar) -->
+                <div id="resumen-cierre" class="hidden">
+                    <h3>Cierre de Mes y Resumen de Gastos</h3>
+                    <div id="detalles-salidas"></div>
+                    <p>Balance General: <span id="balance-final"></span></p>
+                </div>
+            </section>
 
-        <!-- Servicio Técnico -->
-        <section id="servicio-tecnico" class="panel">
-            <h2>Servicio Técnico</h2>
-            <button onclick="nuevaReparacion()">+ Nueva Reparación</button>
-            <button onclick="nuevaCotizacion()">+ Nueva Cotización</button>
-            <table id="tabla-tecnico">
-                <thead><tr><th>Cliente</th><th>Estado</th><th>Falla</th><th>Acción</th></tr></thead>
-                <tbody id="lista-tecnico"></tbody>
-            </table>
-        </section>
+            <!-- Inventario -->
+            <section id="inventario" class="panel view">
+                <h2>Inventario de Productos</h2>
+                <p>Gestión de stock y mercadería.</p>
+            </section>
 
-        <!-- Gestión de Locales -->
-        <section id="gestion-locales" class="panel">
-            <h2>Préstamos de Locales</h2>
-            <table id="tabla-prestamos">
-                <thead><tr><th>Local</th><th>Detalle</th><th>Estado</th><th>Acción</th></tr></thead>
-                <tbody id="lista-prestamos"></tbody>
-            </table>
-        </section>
+            <!-- Servicio Técnico -->
+            <section id="servicio-tecnico" class="panel view">
+                <h2>Servicio Técnico</h2>
+                <button onclick="nuevaReparacion()">+ Nueva Reparación</button>
+                <button onclick="nuevaCotizacion()">+ Nueva Cotización</button>
+                <table id="tabla-tecnico">
+                    <thead><tr><th>Cliente</th><th>Estado</th><th>Falla</th><th>Acción</th></tr></thead>
+                    <tbody id="lista-tecnico"></tbody>
+                </table>
+            </section>
+
+            <!-- Gestión de Locales -->
+            <section id="gestion-locales" class="panel view">
+                <h2>Préstamos de Locales</h2>
+                <table id="tabla-prestamos">
+                    <thead><tr><th>Local</th><th>Detalle</th><th>Estado</th><th>Acción</th></tr></thead>
+                    <tbody id="lista-prestamos"></tbody>
+                </table>
+            </section>
+
+            <!-- Meses y Reportes -->
+            <section id="meses-reportes" class="panel view">
+                <h2>Meses y Reportes</h2>
+                <p>Historial de cierres anteriores y estadísticas financieras.</p>
+            </section>
+        </main>
     </div>
 
     <script src="js/main.js"></script>
