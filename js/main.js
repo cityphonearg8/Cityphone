@@ -1,4 +1,4 @@
-}
+
 
 function anularVenta(id){
 ticketActual = [];
