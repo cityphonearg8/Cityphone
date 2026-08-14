@@ -1,3 +1,4 @@
+let inventario = []; // Definimos la variable globalmente para que todas las funciones la reconozcan
 document.addEventListener('DOMContentLoaded', () => {
 function anularVenta(id){
   ventas = ventas.filter(v => v.id !== id);
