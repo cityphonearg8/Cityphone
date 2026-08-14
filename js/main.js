@@ -1,4 +1,7 @@
-  ticketActual = [];
+}
+
+function anularVenta(id){
+ticketActual = [];
   renderTicket();
   renderAll();
   showToast('¡Venta registrada exitosamente!');
