@@ -1,18 +1,62 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>City Phone - Sistema de Gestión</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-<!-- SDK de Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City Phone - Sistema de Gestión</title>
+    
+    <!-- Fuentes y estilos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Librerías -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-<!-- ... contenido del HTML ... -->
-<script src="js/main.js"></script>
+
+    <div id="app">
+        <!-- 1. Tabla de Inventario -->
+        <section>
+            <h2>Inventario</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Stock</th>
+                        <th>Stock Min</th>
+                        <th>Precio</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-inventario">
+                    <!-- El JS llenará esto automáticamente -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 2. Sección de Servicios Técnicos -->
+        <section>
+            <h2>Servicios Técnicos</h2>
+            <div id="contenedor-servicios"></div>
+        </section>
+
+        <!-- 3. Sección de Promociones -->
+        <section>
+            <h2>Promociones</h2>
+            <div id="lista-promociones"></div>
+        </section>
+
+        <!-- 4. Modal para Calendario/Meses -->
+        <div id="modal-mes-dias" class="modal">
+            <div class="modal-content">
+                <!-- Contenido del modal -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Tu archivo JS corregido -->
+    <script src="js/main.js"></script>
 </body>
 </html>
