@@ -1,6 +1,6 @@
 // --- CONFIGURACIÓN DE SUPABASE ---
-const SUPABASE_URL = 'TUS_DATOS_DE_SUPABASE_URL'; // Reemplaza con tu URL de Supabase
-const SUPABASE_ANON_KEY = 'TUS_DATOS_DE_SUPABASE_KEY'; // Reemplaza con tu Key anónima
+const SUPABASE_URL = [https://tueisfzfpthrrkvkjfsg.supabase.co] // Reemplaza con tu URL de Supabase
+const SUPABASE_ANON_KEY = (https://tueisfzfpthrrkvkjfsg.supabase.co) // Reemplaza con tu Key anónima
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // --- ESTADO GLOBAL ---
