@@ -1,12 +1,4 @@
 
-
-function anularVenta(id){
-ticketActual = [];
-  renderTicket();
-  renderAll();
-  showToast('¡Venta registrada exitosamente!');
-}
-
 function anularVenta(id){
   ventas = ventas.filter(v => v.id !== id);
   renderAll();
