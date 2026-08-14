@@ -362,8 +362,12 @@ function showToast(msg){
     renderAll();
 };
 
-// Llamada para inicializar la interfaz al cargar
-renderAll();
-renderServiciosTecnicos();
-renderPromociones();
-renderMonthsGrid();
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM listo, iniciando renderizado...");
+    
+    // Verificamos que las funciones existan antes de llamarlas
+    if (typeof renderAll === 'function') renderAll();
+    if (typeof renderServiciosTecnicos === 'function') renderServiciosTecnicos();
+    if (typeof renderPromociones === 'function') renderPromociones();
+    if (typeof renderMonthsGrid === 'function') renderMonthsGrid();
+});
