@@ -372,25 +372,7 @@
     padding: 28px;
     box-shadow: var(--shadow-lg);
   }
-/* Estilos adaptativos para celulares */
-@media (max-width: 768px) {
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: -280px; /* Oculto fuera de la pantalla a la izquierda */
-    width: 280px;
-    height: 100vh;
-    background-color: #0f172a; /* Color de fondo de tu sidebar */
-    transition: left 0.3s ease-in-out;
-    z-index: 1000;
-    overflow-y: auto;
-  }
 
-  /* Clase que se activa con JavaScript para mostrar el menú */
-  .sidebar.open {
-    left: 0; 
-  }
-}
   @media (max-width: 768px) {
     #app { flex-direction: column; }
     .mobile-header { display: flex; }
@@ -405,39 +387,13 @@
     .stat-grid { grid-template-columns: repeat(2, 1fr); }
     .form-grid { grid-template-columns: 1fr !important; }
   }
-
-  @media (max-width: 768px) {
-  /* 1. Hace que la barra lateral y el ticket se apilen en una sola columna */
-  div[style*="grid-template-columns"] {
-    display: flex !important;
-    flex-direction: column !important;
-  }
-
-  /* 2. Convierte el menú lateral en un menú desplegable oculto por defecto */
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: -280px;
-    width: 280px;
-    height: 100vh;
-    background-color: #0f172a;
-    transition: left 0.3s ease-in-out;
-    z-index: 1000;
-    overflow-y: auto;
-  }
-
-  /* 3. Muestra el menú cuando se active la clase 'open' */
-  .sidebar.open {
-    left: 0;
-  }
-}
 </style>
 </head>
 <body>
 
 <div id="lock-screen">
   <div class="lock-card">
-    <img src="logo.png" alt="City Phone">
+    <img src="Logotipo cityphone.png" alt="City Phone">
     <div class="lock-greeting">Buenos días, ¡a romperla hoy!</div>
     <div class="motivational-box" id="motivational-message">¡Un nuevo día para ofrecer el mejor servicio y romper récords de venta!</div>
     
@@ -993,8 +949,8 @@
 
 <script>
 // Inicialización de cliente Supabase (Reemplazar con tus credenciales reales del proyecto)
-const SUPABASE_URL = 'https://tueisfzfpthrrkvkjfsg.supabase.co'; 
-const SUPABASE_ANON_KEY = 'sb_publishable_6vYa3ePc4nZL4AadG7oB2g_2PF7PDXh';
+const SUPABASE_URL = 'https://tu-proyecto.supabase.co';
+const SUPABASE_ANON_KEY = 'tu-anon-key';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let inventario = [];       
@@ -1069,14 +1025,6 @@ document.querySelectorAll('.nav-item[data-view], .dropdown-item[data-view]').for
     item.classList.add('active');
     const targetView = item.dataset.view;
     document.getElementById('view-' + targetView).classList.add('active');
-    const menuToggle = document.querySelector('.menu-toggle'); // O la clase/ID que tenga tu botón de hamburguesa
-const sidebar = document.getElementById('sidebar');
-
-if (menuToggle && sidebar) {
-  menuToggle.addEventListener('click', () => {
-    sidebar.classList.toggle('open');
-  });
-}
   });
 });
 
@@ -1636,16 +1584,6 @@ function showToast(msg){
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), 2200);
 }
-
-  const menuBtn = document.querySelector('.fa-bars') || document.querySelector('.menu-toggle') || document.querySelector('header button');
-const sidebar = document.getElementById('sidebar');
-
-if (menuBtn && sidebar) {
-  menuBtn.addEventListener('click', () => {
-    sidebar.classList.toggle('open');
-  });
-}
-
 </script>
 </body>
 </html>
