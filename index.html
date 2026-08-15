@@ -391,6 +391,21 @@
     main { padding: 20px 16px; }
     .stat-grid { grid-template-columns: repeat(2, 1fr); }
     .form-grid { grid-template-columns: 1fr !important; }
+
+    /* En celulares: Invierte el orden en ventas para que el ticket quede arriba */
+    .ventas-layout {
+      display: flex;
+      flex-direction: column-reverse;
+    }
+  }
+
+  @media (min-width: 769px) {
+    .ventas-layout {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
   }
 </style>
 </head>
@@ -542,7 +557,7 @@
         </div>
       </div>
 
-      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start;">
+      <div class="ventas-layout">
         <div>
           <div class="panel">
             <h2>Agregar Productos</h2>
@@ -1008,7 +1023,6 @@ function updateProgramDate(){
 }
 updateProgramDate();
 
-// Función corregida y robusta para abrir/cerrar el menú en celulares
 function toggleMobileMenu() {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebar-overlay');
@@ -1027,7 +1041,6 @@ function navigateTo(viewName) {
   const viewEl = document.getElementById('view-' + viewName);
   if(viewEl) viewEl.classList.add('active');
 
-  // Si estamos en mobile, cerramos el menú al navegar
   const sidebar = document.getElementById('sidebar');
   if(sidebar.classList.contains('open')) {
     toggleMobileMenu();
