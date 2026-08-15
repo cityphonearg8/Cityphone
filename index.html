@@ -109,7 +109,7 @@
     z-index: 99;
   }
   .mobile-header .brand-mark { display: flex; align-items: center; gap: 8px; }
-  .mobile-header .brand-logo-img { height: 28px; width: auto; object-fit: contain; }
+  .mobile-header .brand-logo-img { height: 28px; width: auto; object-fit: contain; filter: brightness(0) invert(1); }
   .btn-menu-toggle {
     background: transparent;
     border: none;
@@ -172,6 +172,11 @@
     transition: all .15s ease;
     width: 100%;
     text-decoration: none;
+    background: transparent;
+    border-top: none;
+    border-right: none;
+    border-bottom: none;
+    text-align: left;
   }
   .nav-item:hover { background: rgba(255,255,255,.08); color: #FFFFFF !important; }
   .nav-item.active { background: rgba(5, 150, 105, 0.2); color: #FFFFFF !important; border-left-color: var(--primary); font-weight: 600; }
@@ -312,7 +317,7 @@
   .tab-btn.active { background: var(--primary); color: #FFFFFF; border-color: var(--primary); }
 
   .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; align-items: end; }
-  .empty { text-align: center; color: var(--muted); padding: 40px 0; font-size: 13.5px; }
+  .empty { text-align: center; color: var(--muted); padding: 20px 0; font-size: 13.5px; }
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--ink); color: #fff; padding: 12px 20px; border-radius: var(--radius-sm); font-size: 13.5px; box-shadow: var(--shadow-lg); opacity: 0; transform: translateY(10px); transition: all .25s; pointer-events: none; z-index: 150; }
   .toast.show { opacity: 1; transform: translateY(0); }
 
@@ -329,7 +334,7 @@
     z-index: 99;
     box-shadow: var(--shadow-lg);
   }
-  .autocomplete-item { padding: 10px 14px; font-size: 13px; cursor: pointer; border-bottom: 1px solid var(--line); }
+  .autocomplete-item { padding: 10px 14px; font-size: 13px; cursor: pointer; border-bottom: 1px solid var(--line); color: var(--ink); }
   .autocomplete-item:hover { background: var(--primary-soft); color: var(--primary-hover); }
 
   .months-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 20px; }
@@ -420,12 +425,12 @@
   <div class="brand-mark">
     <img src="Logotipo cityphone.png" alt="City Phone" class="brand-logo-img">
   </div>
-  <button class="btn-menu-toggle" id="btn-menu-toggle" aria-label="Abrir menú">
+  <button class="btn-menu-toggle" id="btn-menu-toggle" aria-label="Abrir menú" onclick="toggleMobileMenu()">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
   </button>
 </div>
 
-<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileMenu()"></div>
 
 <div id="app">
   <aside class="sidebar" id="sidebar">
@@ -441,7 +446,7 @@
       <div class="nav-item" data-view="caja"><span class="dot"></span>Caja</div>
 
       <div class="mb-2" x-data="{ open: false }">
-        <button @click="open = !open" class="nav-item justify-between w-full text-left" style="background:transparent; border:none; border-left:3px solid transparent;">
+        <button @click="open = !open" class="nav-item justify-between w-full text-left">
           <div style="display:flex; align-items:center; gap:10px;">
             <span class="dot"></span>
             <span style="color:#FFFFFF; font-size:14px; font-weight:500;">Inventario</span>
@@ -623,13 +628,13 @@
 
         <div class="panel" style="border-top: 4px solid var(--primary);">
           <h2>Ticket Actual</h2>
-          <div id="current-sale-items">
+          <div id="current-sale-items" style="min-height: 80px;">
             <div class="empty">No hay productos seleccionados</div>
           </div>
           <div style="margin-top: 20px; border-top: 1px solid var(--line); padding-top: 16px;">
-            <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; margin-bottom: 12px; color: var(--ink);">
               <span>Total:</span>
-              <span id="ticket-total-val" style="font-family: var(--font-mono);">$0</span>
+              <span id="ticket-total-val" style="font-family: var(--font-mono); color: var(--primary-hover);">$0</span>
             </div>
             <button class="btn-primary" style="width: 100%; font-size: 15px; padding: 12px;" onclick="registerSale()">
               ✓ Cobrar y Registrar
@@ -948,7 +953,6 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// Inicialización de cliente Supabase (Reemplazar con tus credenciales reales del proyecto)
 const SUPABASE_URL = 'https://tu-proyecto.supabase.co';
 const SUPABASE_ANON_KEY = 'tu-anon-key';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -971,7 +975,6 @@ async function verifyLogin(){
     document.getElementById('lock-screen').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
     
-    // Cargar datos remotos al iniciar sesión con éxito
     await cargarDatosSupabase();
     renderAll();
     renderMonthsGrid();
@@ -1005,6 +1008,15 @@ function updateProgramDate(){
 }
 updateProgramDate();
 
+// Función corregida y robusta para abrir/cerrar el menú en celulares
+function toggleMobileMenu() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('active');
+}
+
 function navigateTo(viewName) {
   document.querySelectorAll('.nav-item, .dropdown-item').forEach(i=>i.classList.remove('active'));
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
@@ -1014,6 +1026,12 @@ function navigateTo(viewName) {
   
   const viewEl = document.getElementById('view-' + viewName);
   if(viewEl) viewEl.classList.add('active');
+
+  // Si estamos en mobile, cerramos el menú al navegar
+  const sidebar = document.getElementById('sidebar');
+  if(sidebar.classList.contains('open')) {
+    toggleMobileMenu();
+  }
 }
 
 document.querySelectorAll('.nav-item[data-view], .dropdown-item[data-view]').forEach(item=>{
@@ -1025,6 +1043,11 @@ document.querySelectorAll('.nav-item[data-view], .dropdown-item[data-view]').for
     item.classList.add('active');
     const targetView = item.dataset.view;
     document.getElementById('view-' + targetView).classList.add('active');
+
+    const sidebar = document.getElementById('sidebar');
+    if(sidebar.classList.contains('open')) {
+      toggleMobileMenu();
+    }
   });
 });
 
@@ -1062,7 +1085,6 @@ async function addProductCustom() {
     return;
   }
 
-  // Sincronización robusta con Supabase
   const { data, error } = await _supabase
     .from('productos')
     .insert([
@@ -1177,8 +1199,8 @@ function renderTicket() {
   ticketActual.forEach((item, index) => {
     total += item.precio * item.cant;
     html += `<tr>
-      <td>${item.nombre}</td>
-      <td class="num">$${item.precio.toLocaleString()}</td>
+      <td style="color: var(--ink); font-weight: 500;">${item.nombre}</td>
+      <td class="num" style="color: var(--ink); font-family: var(--font-mono);">$${item.precio.toLocaleString()}</td>
       <td class="num"><button class="btn-danger btn-sm" onclick="removeTicketItem(${index})">X</button></td>
     </tr>`;
   });
