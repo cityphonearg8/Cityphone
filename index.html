@@ -392,7 +392,6 @@
     .stat-grid { grid-template-columns: repeat(2, 1fr); }
     .form-grid { grid-template-columns: 1fr !important; }
 
-    /* En celulares: Orden limpio y sin duplicaciones */
     .ventas-layout {
       display: flex;
       flex-direction: column-reverse;
@@ -480,7 +479,7 @@
   </aside>
 
   <main>
-    <div class="view active" id="view-dashboard">
+    <div class="view" id="view-dashboard">
       <div class="page-header-row">
         <div>
           <h1>Dashboard General</h1>
@@ -507,33 +506,22 @@
         </div>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-        <div class="panel">
-          <h2>Resumen por Medio de Pago (Mes)</h2>
-          <table>
-            <thead>
-              <tr><th>Medio</th><th class="num">Monto Total</th></tr>
-            </thead>
-            <tbody id="dash-tabla-medios">
-              <tr><td>Efectivo</td><td class="num" id="dash-medio-efectivo">$0</td></tr>
-              <tr><td>Transferencia</td><td class="num" id="dash-medio-transferencia">$0</td></tr>
-              <tr><td>Débito / Crédito / Mixto</td><td class="num" id="dash-medio-tarjeta">$0</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="panel">
-          <h2>Acciones Rápidas</h2>
-          <div style="display: flex; flex-direction: column; gap: 10px;">
-            <button class="btn-primary" onclick="navigateTo('vender')">Ir a Panel de Ventas</button>
-            <button class="btn-secondary" onclick="navigateTo('inventario')">Revisar Inventario</button>
-            <button class="btn-secondary" onclick="navigateTo('prestamos')">Ver Lista de Compras</button>
-          </div>
-        </div>
+      <div class="panel">
+        <h2>Resumen por Medio de Pago (Mes)</h2>
+        <table>
+          <thead>
+            <tr><th>Medio</th><th class="num">Monto Total</th></tr>
+          </thead>
+          <tbody id="dash-tabla-medios">
+            <tr><td>Efectivo</td><td class="num" id="dash-medio-efectivo">$0</td></tr>
+            <tr><td>Transferencia</td><td class="num" id="dash-medio-transferencia">$0</td></tr>
+            <tr><td>Débito / Crédito / Mixto</td><td class="num" id="dash-medio-tarjeta">$0</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <div class="view" id="view-vender">
+    <div class="view active" id="view-vender">
       <div class="page-header-row">
         <div>
           <h1>Panel de Ventas</h1>
@@ -561,64 +549,65 @@
         <!-- Columna Izquierda -->
         <div>
           <div class="panel">
-            <h2>Agregar Productos</h2>
-            <div class="form-grid" style="grid-template-columns: 1fr 140px auto; align-items: end; gap: 10px;">
-              <div class="field">
-                <label>Producto o Detalle</label>
-                <div class="autocomplete-wrapper">
-                  <input id="venta-buscador" type="text" placeholder="Buscar producto..." oninput="handleVentaSearch()" autocomplete="off">
-                  <div id="venta-autocomplete-results" class="autocomplete-results" style="display:none;"></div>
+            <h2>Agregar Productos y Medio de Pago</h2>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div class="form-grid" style="grid-template-columns: 1fr 140px; align-items: end; gap: 10px;">
+                <div class="field">
+                  <label>Producto o Detalle</label>
+                  <div class="autocomplete-wrapper">
+                    <input id="venta-buscador" type="text" placeholder="Buscar producto..." oninput="handleVentaSearch()" autocomplete="off">
+                    <div id="venta-autocomplete-results" class="autocomplete-results" style="display:none;"></div>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Precio de Venta ($)</label>
+                  <input id="venta-precio-custom" type="number" placeholder="0">
                 </div>
               </div>
-              <div class="field">
-                <label>Precio de Venta ($)</label>
-                <input id="venta-precio-custom" type="number" placeholder="0">
+
+              <div class="form-grid" style="grid-template-columns: 1fr auto; align-items: end; gap: 10px;">
+                <div class="field">
+                  <label>Medio de Pago</label>
+                  <select id="venta-medio-pago" onchange="togglePagoMixto()">
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Débito">Débito (1.21%)</option>
+                    <option value="Crédito">Crédito (2.42%)</option>
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Mixto">Pago Mixto (Combinado)</option>
+                  </select>
+                </div>
+                <button class="btn-primary" style="height: 41px;" onclick="addItemToCurrentSale()">+ Agregar</button>
               </div>
-              <button class="btn-primary" onclick="addItemToCurrentSale()">+ Agregar</button>
-            </div>
-          </div>
 
-          <div class="panel">
-            <h2>Medio de Pago</h2>
-            <div class="field" style="margin-bottom: 12px;">
-              <label>Seleccionar Medio</label>
-              <select id="venta-medio-pago" onchange="togglePagoMixto()">
-                <option value="Efectivo">Efectivo</option>
-                <option value="Débito">Débito (1.21%)</option>
-                <option value="Crédito">Crédito (2.42%)</option>
-                <option value="Transferencia">Transferencia</option>
-                <option value="Mixto">Pago Mixto (Combinado)</option>
-              </select>
-            </div>
-
-            <div id="seccion-pago-mixto" style="display: none; background: var(--bg); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--line); margin-top: 10px;">
-              <div style="font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 10px;">Configurar Pago Mixto</div>
-              <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
-                <div class="field">
-                  <label>Primer Medio</label>
-                  <select id="mixto-medio-1">
-                    <option value="Efectivo">Efectivo</option>
-                    <option value="Débito">Débito</option>
-                    <option value="Crédito">Crédito</option>
-                    <option value="Transferencia">Transferencia</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label>Monto 1 ($)</label>
-                  <input id="mixto-monto-1" type="number" placeholder="0">
-                </div>
-                <div class="field">
-                  <label>Segundo Medio</label>
-                  <select id="mixto-medio-2">
-                    <option value="Transferencia">Transferencia</option>
-                    <option value="Efectivo">Efectivo</option>
-                    <option value="Débito">Débito</option>
-                    <option value="Crédito">Crédito</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label>Monto 2 ($)</label>
-                  <input id="mixto-monto-2" type="number" placeholder="0">
+              <div id="seccion-pago-mixto" style="display: none; background: var(--bg); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--line); margin-top: 4px;">
+                <div style="font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 10px;">Configurar Pago Mixto</div>
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                  <div class="field">
+                    <label>Primer Medio</label>
+                    <select id="mixto-medio-1">
+                      <option value="Efectivo">Efectivo</option>
+                      <option value="Débito">Débito</option>
+                      <option value="Crédito">Crédito</option>
+                      <option value="Transferencia">Transferencia</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>Monto 1 ($)</label>
+                    <input id="mixto-monto-1" type="number" placeholder="0">
+                  </div>
+                  <div class="field">
+                    <label>Segundo Medio</label>
+                    <select id="mixto-medio-2">
+                      <option value="Transferencia">Transferencia</option>
+                      <option value="Efectivo">Efectivo</option>
+                      <option value="Débito">Débito</option>
+                      <option value="Crédito">Crédito</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>Monto 2 ($)</label>
+                    <input id="mixto-monto-2" type="number" placeholder="0">
+                  </div>
                 </div>
               </div>
             </div>
