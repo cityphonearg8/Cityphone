@@ -372,7 +372,25 @@
     padding: 28px;
     box-shadow: var(--shadow-lg);
   }
+/* Estilos adaptativos para celulares */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px; /* Oculto fuera de la pantalla a la izquierda */
+    width: 280px;
+    height: 100vh;
+    background-color: #0f172a; /* Color de fondo de tu sidebar */
+    transition: left 0.3s ease-in-out;
+    z-index: 1000;
+    overflow-y: auto;
+  }
 
+  /* Clase que se activa con JavaScript para mostrar el menú */
+  .sidebar.open {
+    left: 0; 
+  }
+}
   @media (max-width: 768px) {
     #app { flex-direction: column; }
     .mobile-header { display: flex; }
@@ -1025,6 +1043,14 @@ document.querySelectorAll('.nav-item[data-view], .dropdown-item[data-view]').for
     item.classList.add('active');
     const targetView = item.dataset.view;
     document.getElementById('view-' + targetView).classList.add('active');
+    const menuToggle = document.querySelector('.menu-toggle'); // O la clase/ID que tenga tu botón de hamburguesa
+const sidebar = document.getElementById('sidebar');
+
+if (menuToggle && sidebar) {
+  menuToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+  });
+}
   });
 });
 
@@ -1584,6 +1610,8 @@ function showToast(msg){
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), 2200);
 }
+
+
 </script>
 </body>
 </html>
