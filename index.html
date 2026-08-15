@@ -172,11 +172,6 @@
     transition: all .15s ease;
     width: 100%;
     text-decoration: none;
-    background: transparent;
-    border-top: none;
-    border-right: none;
-    border-bottom: none;
-    text-align: left;
   }
   .nav-item:hover { background: rgba(255,255,255,.08); color: #FFFFFF !important; }
   .nav-item.active { background: rgba(5, 150, 105, 0.2); color: #FFFFFF !important; border-left-color: var(--primary); font-weight: 600; }
@@ -441,9 +436,9 @@
       </div>
     </div>
     <nav>
-      <button class="nav-item active" data-view="dashboard"><span class="dot"></span>Dashboard</button>
-      <button class="nav-item" data-view="vender"><span class="dot"></span>Ventas</button>
-      <button class="nav-item" data-view="caja"><span class="dot"></span>Caja</button>
+      <div class="nav-item active" data-view="dashboard"><span class="dot"></span>Dashboard</div>
+      <div class="nav-item" data-view="vender"><span class="dot"></span>Ventas</div>
+      <div class="nav-item" data-view="caja"><span class="dot"></span>Caja</div>
 
       <div class="mb-2" x-data="{ open: false }">
         <button @click="open = !open" class="nav-item justify-between w-full text-left" style="background:transparent; border:none; border-left:3px solid transparent;">
@@ -458,9 +453,9 @@
         </div>
       </div>
 
-      <button class="nav-item" data-view="servicio"><span class="dot"></span>Servicio Técnico</button>
-      <button class="nav-item" data-view="prestamos"><span class="dot"></span>Gestión de Locales</button>
-      <button class="nav-item" data-view="meses-reportes"><span class="dot"></span>Meses y Reportes</button>
+      <div class="nav-item" data-view="servicio"><span class="dot"></span>Servicio Técnico</div>
+      <div class="nav-item" data-view="prestamos"><span class="dot"></span>Gestión de Locales</div>
+      <div class="nav-item" data-view="meses-reportes"><span class="dot"></span>Meses y Reportes</div>
     </nav>
   </aside>
 
@@ -953,9 +948,9 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// Configuración de Supabase (Reemplaza con tus datos reales)
-const SUPABASE_URL = 'https://tueisfzfpthrrkvkjfsg.supabase.co';
-const SUPABASE_ANON_KEY = 'PEGA_AQUI_TU_ANON_KEY';
+// Inicialización de cliente Supabase (Reemplazar con tus credenciales reales del proyecto)
+const SUPABASE_URL = 'https://tu-proyecto.supabase.co';
+const SUPABASE_ANON_KEY = 'tu-anon-key';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let inventario = [];       
@@ -976,6 +971,7 @@ async function verifyLogin(){
     document.getElementById('lock-screen').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
     
+    // Cargar datos remotos al iniciar sesión con éxito
     await cargarDatosSupabase();
     renderAll();
     renderMonthsGrid();
@@ -1066,6 +1062,7 @@ async function addProductCustom() {
     return;
   }
 
+  // Sincronización robusta con Supabase
   const { data, error } = await _supabase
     .from('productos')
     .insert([
