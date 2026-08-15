@@ -405,6 +405,32 @@
     .stat-grid { grid-template-columns: repeat(2, 1fr); }
     .form-grid { grid-template-columns: 1fr !important; }
   }
+
+  @media (max-width: 768px) {
+  /* 1. Hace que la barra lateral y el ticket se apilen en una sola columna */
+  div[style*="grid-template-columns"] {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* 2. Convierte el menú lateral en un menú desplegable oculto por defecto */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100vh;
+    background-color: #0f172a;
+    transition: left 0.3s ease-in-out;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+
+  /* 3. Muestra el menú cuando se active la clase 'open' */
+  .sidebar.open {
+    left: 0;
+  }
+}
 </style>
 </head>
 <body>
@@ -1611,6 +1637,14 @@ function showToast(msg){
   setTimeout(()=>t.classList.remove('show'), 2200);
 }
 
+  const menuBtn = document.querySelector('.fa-bars') || document.querySelector('.menu-toggle') || document.querySelector('header button');
+const sidebar = document.getElementById('sidebar');
+
+if (menuBtn && sidebar) {
+  menuBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+  });
+}
 
 </script>
 </body>
