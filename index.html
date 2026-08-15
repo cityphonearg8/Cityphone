@@ -392,11 +392,11 @@
     .stat-grid { grid-template-columns: repeat(2, 1fr); }
     .form-grid { grid-template-columns: 1fr !important; }
 
-    /* En celulares: Invierte el orden en ventas para que el ticket y medio de pago queden arriba */
+    /* Invierte el orden: El Ticket Actual y los Medios de Pago quedan arriba en el celular */
     .ventas-layout {
       display: flex;
       flex-direction: column-reverse;
-    }
+      }
   }
 
   @media (min-width: 769px) {
@@ -438,7 +438,7 @@
 
 <div class="mobile-header">
   <div class="brand-mark">
-    <img src="Logotipo cityphone.png" alt="City Phone" class="brand-logo-img">
+    <img src="Logotipo logo.png" alt="City Phone" class="brand-logo-img">
   </div>
   <button class="btn-menu-toggle" id="btn-menu-toggle" aria-label="Abrir menú" onclick="toggleMobileMenu()">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
@@ -451,7 +451,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="brand-mark">
-        <img src="Logotipo cityphone.png" alt="City Phone" class="brand-logo-img">
+        <img src="Logotipo logo.png" alt="City Phone" class="brand-logo-img">
         <div class="program-date-display" id="program-date-display">--/--/----</div>
       </div>
     </div>
@@ -559,6 +559,53 @@
 
       <div class="ventas-layout">
         <!-- Columna Izquierda en PC / Abajo en Celular: Productos, Medio de Pago e Historial -->
+        <div class="ventas-layout">
+  <!-- En celulares, esta columna aparecerá ABAJO -->
+  <div>
+    <div class="panel">
+      <h2>Agregar Productos</h2>
+      <!-- Buscador y campos de productos -->
+    </div>
+
+    <!-- El panel de Medios de Pago ahora se ubica en la parte superior junto al ticket en celular -->
+    <div class="panel" id="panel-medios-pago-movil">
+      <h2>Medio de Pago</h2>
+      <div class="field" style="margin-bottom: 12px;">
+        <label>Seleccionar Medio</label>
+        <select id="venta-medio-pago" onchange="togglePagoMixto()">
+          <option value="Efectivo">Efectivo</option>
+          <option value="Débito">Débito (1.21%)</option>
+          <option value="Crédito">Crédito (2.42%)</option>
+          <option value="Transferencia">Transferencia</option>
+          <option value="Mixto">Pago Mixto (Combinado)</option>
+        </select>
+      </div>
+      <!-- Configuración de pago mixto -->
+    </div>
+
+    <div class="panel">
+      <h2>Historial de Ventas (Anular / Borrar)</h2>
+      <!-- Historial -->
+    </div>
+  </div>
+
+  <!-- En celulares, usando flex-direction: column-reverse, este bloque con el Ticket y Medios de Pago sube ARRIBA -->
+  <div class="panel" style="border-top: 4px solid var(--primary);">
+    <h2>Ticket Actual</h2>
+    <div id="current-sale-items" style="min-height: 80px;">
+      <div class="empty">No hay productos seleccionados</div>
+    </div>
+    <div style="margin-top: 20px; border-top: 1px solid var(--line); padding-top: 16px;">
+      <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; margin-bottom: 12px; color: var(--ink);">
+        <span>Total:</span>
+        <span id="ticket-total-val" style="font-family: var(--font-mono); color: var(--primary-hover);">$0</span>
+      </div>
+      <button class="btn-primary" style="width: 100%; font-size: 15px; padding: 12px;" onclick="registerSale()">
+        ✓ Cobrar y Registrar
+      </button>
+    </div>
+  </div>
+</div>
         <div>
           <div class="panel">
             <h2>Agregar Productos</h2>
