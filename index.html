@@ -392,7 +392,7 @@
     .stat-grid { grid-template-columns: repeat(2, 1fr); }
     .form-grid { grid-template-columns: 1fr !important; }
 
-    /* En celulares: Invierte el orden en ventas para que el ticket quede arriba */
+    /* En celulares: Invierte el orden en ventas para que el ticket y medio de pago queden arriba */
     .ventas-layout {
       display: flex;
       flex-direction: column-reverse;
@@ -558,6 +558,7 @@
       </div>
 
       <div class="ventas-layout">
+        <!-- Columna Izquierda en PC / Abajo en Celular: Productos, Medio de Pago e Historial -->
         <div>
           <div class="panel">
             <h2>Agregar Productos</h2>
@@ -641,6 +642,7 @@
           </div>
         </div>
 
+        <!-- Columna Derecha en PC / Arriba en Celular: Ticket Actual -->
         <div class="panel" style="border-top: 4px solid var(--primary);">
           <h2>Ticket Actual</h2>
           <div id="current-sale-items" style="min-height: 80px;">
