@@ -515,6 +515,7 @@
           <tbody id="dash-tabla-medios">
             <tr><td>Efectivo</td><td class="num" id="dash-medio-efectivo">$0</td></tr>
             <tr><td>Transferencia</td><td class="num" id="dash-medio-transferencia">$0</td></tr>
+            <tr><td>Código QR</td><td class="num" id="dash-medio-qr">$0</td></tr>
             <tr><td>Débito / Crédito / Mixto</td><td class="num" id="dash-medio-tarjeta">$0</td></tr>
           </tbody>
         </table>
@@ -573,6 +574,7 @@
                     <option value="Débito">Débito (1.21%)</option>
                     <option value="Crédito">Crédito (2.42%)</option>
                     <option value="Transferencia">Transferencia</option>
+                    <option value="QR">Código QR</option>
                     <option value="Mixto">Pago Mixto (Combinado)</option>
                   </select>
                 </div>
@@ -589,6 +591,7 @@
                       <option value="Débito">Débito</option>
                       <option value="Crédito">Crédito</option>
                       <option value="Transferencia">Transferencia</option>
+                      <option value="QR">Código QR</option>
                     </select>
                   </div>
                   <div class="field">
@@ -602,6 +605,7 @@
                       <option value="Efectivo">Efectivo</option>
                       <option value="Débito">Débito</option>
                       <option value="Crédito">Crédito</option>
+                      <option value="QR">Código QR</option>
                     </select>
                   </div>
                   <div class="field">
@@ -1003,6 +1007,18 @@ async function cargarDatosSupabase() {
         stockMin: item.stock_min || 2
       }));
     }
+
+    // Cargar también ventas guardadas en Supabase (si creaste la tabla 'ventas')
+    const { data: ventasData, error: ventasError } = await _supabase.from('ventas').select('*');
+    if(!ventasError && ventasData) {
+      ventas = ventasData.map(v => ({
+        id: v.id,
+        fecha: new Date(v.created_at || v.fecha),
+        total: v.total,
+        medio: v.medio,
+        items: typeof v.items === 'string' ? JSON.parse(v.items) : (v.items || [])
+      }));
+    }
   } catch(e) {
     console.error('Excepción al conectar con Supabase:', e);
   }
@@ -1218,7 +1234,7 @@ function removeTicketItem(index) {
   renderTicket();
 }
 
-function registerSale() {
+async function registerSale() {
   if(ticketActual.length === 0) { showToast('El ticket está vacío'); return; }
 
   const total = ticketActual.reduce((acc, i) => acc + (i.precio * i.cant), 0);
@@ -1233,12 +1249,24 @@ function registerSale() {
     }
   }
 
-  ticketActual.forEach(item => {
+  // Actualizar stock local y en Supabase
+  for(let item of ticketActual) {
     const invItem = inventario.find(i => i.nombre.toLowerCase() === item.nombre.toLowerCase());
     if(invItem) {
       invItem.stock = Math.max(0, invItem.stock - item.cant);
+      await _supabase.from('productos').update({ stock: invItem.stock }).eq('id', invItem.id);
     }
-  });
+  }
+
+  // Guardar la venta en Supabase (si tienes la tabla creada, o de forma local si prefieres)
+  const nuevaVenta = {
+    fecha: new Date().toISOString(),
+    total,
+    medio,
+    items: JSON.stringify(ticketActual)
+  };
+  
+  await _supabase.from('ventas').insert([nuevaVenta]);
 
   ventas.push({
     id: Date.now(),
@@ -1254,8 +1282,9 @@ function registerSale() {
   showToast('¡Venta registrada exitosamente!');
 }
 
-function anularVenta(id){
+async function anularVenta(id){
   ventas = ventas.filter(v => v.id !== id);
+  await _supabase.from('ventas').delete().eq('id', id);
   renderAll();
   showToast('Venta anulada correctamente');
 }
@@ -1563,6 +1592,14 @@ function renderAll() {
 
   const totalHistorico = ventas.reduce((acc, v) => acc + v.total, 0);
   const ventasHoyTotal = ventas.filter(v => new Date(v.fecha).toDateString() === new Date().toDateString()).reduce((acc, v) => acc + v.total, 0);
+  
+  const ventasHoyNeto = ventas.filter(v => new Date(v.fecha).toDateString() === new Date().toDateString()).reduce((acc, v) => {
+    let comision = 0;
+    if (v.medio === 'Débito') comision = v.total * 0.0121;
+    else if (v.medio === 'Crédito') comision = v.total * 0.0242;
+    return acc + (v.total - comision);
+  }, 0);
+
   const totalRetiros = gastosCaja.reduce((acc, g) => acc + g.monto, 0);
   const efectivoEnCaja = (ventas.filter(v => v.medio === 'Efectivo').reduce((acc, v) => acc + v.total, 0)) - totalRetiros;
 
@@ -1572,7 +1609,7 @@ function renderAll() {
   document.getElementById('dash-bajo-stock').textContent = itemsBajoStock.length;
 
   document.getElementById('stat-ventas-hoy').textContent = `$${ventasHoyTotal.toLocaleString()}`;
-  document.getElementById('stat-ventas-hoy-neto').textContent = `$${ventasHoyTotal.toLocaleString()}`;
+  document.getElementById('stat-ventas-hoy-neto').textContent = `$${ventasHoyNeto.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
   document.getElementById('stat-ventas-mes').textContent = `$${ventasHoyTotal.toLocaleString()}`;
 
   document.getElementById('caja-stat-saldo').textContent = `$${efectivoEnCaja.toLocaleString()}`;
@@ -1597,10 +1634,12 @@ function renderAll() {
 
   const efec = ventas.filter(v => v.medio === 'Efectivo').reduce((acc, v) => acc + v.total, 0);
   const trans = ventas.filter(v => v.medio === 'Transferencia').reduce((acc, v) => acc + v.total, 0);
+  const qr = ventas.filter(v => v.medio === 'QR').reduce((acc, v) => acc + v.total, 0);
   const tarj = ventas.filter(v => v.medio === 'Débito' || v.medio === 'Crédito' || v.medio === 'Mixto').reduce((acc, v) => acc + v.total, 0);
 
   document.getElementById('dash-medio-efectivo').textContent = `$${efec.toLocaleString()}`;
   document.getElementById('dash-medio-transferencia').textContent = `$${trans.toLocaleString()}`;
+  document.getElementById('dash-medio-qr').textContent = `$${qr.toLocaleString()}`;
   document.getElementById('dash-medio-tarjeta').textContent = `$${tarj.toLocaleString()}`;
 }
 
