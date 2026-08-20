@@ -458,6 +458,7 @@
       <div class="nav-item active" data-view="dashboard"><span class="dot"></span>Dashboard</div>
       <div class="nav-item" data-view="vender"><span class="dot"></span>Ventas</div>
       <div class="nav-item" data-view="caja"><span class="dot"></span>Caja</div>
+      <div class="nav-item" data-view="calculadora"><span class="dot"></span>Calculadora</div>
 
       <div class="mb-2" x-data="{ open: false }">
         <button @click="open = !open" class="nav-item justify-between w-full text-left">
@@ -516,13 +517,13 @@
             <tr><td>Efectivo</td><td class="num" id="dash-medio-efectivo">$0</td></tr>
             <tr><td>Transferencia</td><td class="num" id="dash-medio-transferencia">$0</td></tr>
             <tr><td>Código QR</td><td class="num" id="dash-medio-qr">$0</td></tr>
-            <tr><td>Débito / Crédito / Mixto</td><td class="num" id="dash-medio-tarjeta">$0</td></tr>
+            <tr><td>Débito / Santander / Total Coin / PICS / Cuotas / Mixto</td><td class="num" id="dash-medio-tarjeta">$0</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <div class="view active" id="view-vender">
+    <div class="view" id="view-vender">
       <div class="page-header-row">
         <div>
           <h1>Panel de Ventas</h1>
@@ -566,18 +567,31 @@
                 </div>
               </div>
 
-              <div class="form-grid" style="grid-template-columns: 1fr auto; align-items: end; gap: 10px;">
+              <!-- Modificado: Medio de pago y selector de cuotas (3 o 6) al lado -->
+              <div class="form-grid" style="grid-template-columns: 1fr 140px auto; align-items: end; gap: 10px;">
                 <div class="field">
                   <label>Medio de Pago</label>
-                  <select id="venta-medio-pago" onchange="togglePagoMixto()">
+                  <select id="venta-medio-pago" onchange="togglePagoMedio()">
                     <option value="Efectivo">Efectivo</option>
                     <option value="Débito">Débito (1.21%)</option>
-                    <option value="Crédito">Crédito (2.42%)</option>
+                    <option value="Santander">Santander - Crédito (2.42%)</option>
+                    <option value="TotalCoin">Crédito de Total Coin (3.25%)</option>
+                    <option value="Cuotas">Cuotas</option>
+                    <option value="PICS">PICS</option>
                     <option value="Transferencia">Transferencia</option>
                     <option value="QR">Código QR</option>
                     <option value="Mixto">Pago Mixto (Combinado)</option>
                   </select>
                 </div>
+                
+                <div class="field" id="seccion-cuotas-opcion" style="display: none;">
+                  <label>Cuotas</label>
+                  <select id="cuotas-cantidad-select">
+                    <option value="3 cuotas">3 cuotas</option>
+                    <option value="6 cuotas">6 cuotas</option>
+                  </select>
+                </div>
+
                 <button class="btn-primary" style="height: 41px;" onclick="addItemToCurrentSale()">+ Agregar</button>
               </div>
 
@@ -589,7 +603,8 @@
                     <select id="mixto-medio-1">
                       <option value="Efectivo">Efectivo</option>
                       <option value="Débito">Débito</option>
-                      <option value="Crédito">Crédito</option>
+                      <option value="Santander">Santander</option>
+                      <option value="TotalCoin">Total Coin</option>
                       <option value="Transferencia">Transferencia</option>
                       <option value="QR">Código QR</option>
                     </select>
@@ -604,7 +619,8 @@
                       <option value="Transferencia">Transferencia</option>
                       <option value="Efectivo">Efectivo</option>
                       <option value="Débito">Débito</option>
-                      <option value="Crédito">Crédito</option>
+                      <option value="Santander">Santander</option>
+                      <option value="TotalCoin">Total Coin</option>
                       <option value="QR">Código QR</option>
                     </select>
                   </div>
@@ -622,14 +638,16 @@
             <table>
               <thead>
                 <tr>
-                  <th>Hora / Fecha</th>
+                  <th>Fecha</th>
+                  <th>Producto Vendido</th>
                   <th>Medio</th>
+                  <th>Cuotas</th>
                   <th class="num">Total</th>
                   <th style="text-align: center;">Acción</th>
                 </tr>
               </thead>
               <tbody id="tabla-historial-ventas">
-                <tr><td colspan="4" class="empty">No hay ventas registradas</td></tr>
+                <tr><td colspan="6" class="empty">No hay ventas registradas</td></tr>
               </tbody>
             </table>
           </div>
@@ -654,6 +672,35 @@
       </div>
     </div>
 
+    <div class="view" id="view-calculadora">
+      <div class="page-header-row">
+        <div>
+          <h1>Calculadora de Cuotas</h1>
+          <p class="page-sub">Calculá el precio final aplicando el recargo correspondiente para el cliente.</p>
+        </div>
+      </div>
+      <div class="panel" style="max-width: 600px;">
+        <h2>Calculadora Financiera</h2>
+        <div class="form-grid" style="grid-template-columns: 1fr; gap: 16px;">
+          <div class="field">
+            <label>Precio Base / de Lista ($)</label>
+            <input id="calc-precio-base" type="number" placeholder="Ingresá el monto" oninput="calcularCuotasCliente()">
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div style="background: var(--bg); padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--line);">
+              <div style="font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">3 Cuotas</div>
+              <div style="font-size: 20px; font-family: var(--font-mono); font-weight: 700; color: var(--primary);" id="calc-resultado-3">$0</div>
+            </div>
+            <div style="background: var(--bg); padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--line);">
+              <div style="font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">6 Cuotas</div>
+              <div style="font-size: 20px; font-family: var(--font-mono); font-weight: 700; color: var(--teal);" id="calc-resultado-6">$0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="view" id="view-caja">
       <div class="page-header-row">
         <div>
@@ -671,9 +718,16 @@
 
       <div class="panel">
         <h2>Registrar Retiro / Gasto de Dinero</h2>
-        <div class="form-grid">
-          <div class="field"><label>Monto ($)</label><input id="caja-monto" type="number"></div>
-          <div class="field" style="grid-column: span 2;"><label>Motivo</label><input id="caja-motivo" placeholder="Ej: Compra de mercadería / Proveedores / Alquiler"></div>
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr auto; align-items: end; gap: 14px;">
+          <div class="field"><label>Monto ($)</label><input id="caja-monto" type="number" placeholder="0"></div>
+          <div class="field"><label>Motivo</label><input id="caja-motivo" placeholder="Ej: Proveedores / Alquiler"></div>
+          <div class="field">
+            <label>Medio de Pago</label>
+            <select id="caja-medio-pago">
+              <option value="Efectivo">Efectivo</option>
+              <option value="Transferencia">Transferencia</option>
+            </select>
+          </div>
           <button class="btn-primary" onclick="sacarEfectivoCaja()">Registrar Salida</button>
         </div>
       </div>
@@ -695,21 +749,20 @@
       </div>
 
       <div class="panel">
-        <h2>Productos en Inventario (Modificables)</h2>
+        <h2>Productos en Inventario</h2>
         <table>
           <thead>
             <tr>
               <th>Producto</th>
-              <th class="num">Costo</th>
-              <th class="num">Venta</th>
-              <th class="num">Stock</th>
-              <th class="num">Mín.</th>
+              <th class="num">Precio Costo</th>
+              <th class="num">Precio Venta</th>
+              <th class="num">Stock Actual</th>
+              <th class="num">Stock Mínimo</th>
               <th>Estado</th>
-              <th style="text-align: center;">Acción</th>
             </tr>
           </thead>
           <tbody id="tabla-inventario">
-            <tr><td colspan="7" class="empty">No hay productos en el inventario</td></tr>
+            <tr><td colspan="6" class="empty">No hay productos en el inventario</td></tr>
           </tbody>
         </table>
       </div>
@@ -951,11 +1004,12 @@
         <tr>
           <th>Fecha / Hora</th>
           <th>Motivo del Gasto</th>
+          <th>Medio</th>
           <th class="num">Monto</th>
         </tr>
       </thead>
       <tbody id="tabla-cierre-gastos">
-        <tr><td colspan="3" class="empty">No hay gastos o retiros registrados en el mes</td></tr>
+        <tr><td colspan="4" class="empty">No hay gastos o retiros registrados en el mes</td></tr>
       </tbody>
     </table>
   </div>
@@ -1016,6 +1070,7 @@ async function cargarDatosSupabase() {
         fecha: new Date(v.created_at || v.fecha),
         total: v.total,
         medio: v.medio,
+        cuotas: v.cuotas || '-',
         items: typeof v.items === 'string' ? JSON.parse(v.items) : (v.items || [])
       }));
     }
@@ -1036,6 +1091,22 @@ function toggleMobileMenu() {
   
   sidebar.classList.toggle('open');
   overlay.classList.toggle('active');
+}
+
+function navigateTo(viewName) {
+  document.querySelectorAll('.nav-item, .dropdown-item').forEach(i=>i.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  
+  const targetItem = document.querySelector(`[data-view="${viewName}"]`);
+  if(targetItem) targetItem.classList.add('active');
+  
+  const viewEl = document.getElementById('view-' + viewName);
+  if(viewEl) viewEl.classList.add('active');
+
+  const sidebar = document.getElementById('sidebar');
+  if(sidebar.classList.contains('open')) {
+    toggleMobileMenu();
+  }
 }
 
 document.querySelectorAll('.nav-item[data-view], .dropdown-item[data-view]').forEach(item=>{
@@ -1072,9 +1143,19 @@ function switchServiceTab(tab){
   document.getElementById('tab-cotizacion-btn').classList.toggle('active', tab === 'cotizacion');
 }
 
-function togglePagoMixto() {
+function togglePagoMedio() {
   const medio = document.getElementById('venta-medio-pago').value;
   document.getElementById('seccion-pago-mixto').style.display = medio === 'Mixto' ? 'block' : 'none';
+  document.getElementById('seccion-cuotas-opcion').style.display = medio === 'Cuotas' ? 'block' : 'none';
+}
+
+function calcularCuotasCliente() {
+  const precioBase = parseFloat(document.getElementById('calc-precio-base').value) || 0;
+  const total3Cuotas = precioBase * 1.20; 
+  const total6Cuotas = precioBase * 1.40;
+
+  document.getElementById('calc-resultado-3').textContent = `$${total3Cuotas.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+  document.getElementById('calc-resultado-6').textContent = `$${total6Cuotas.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 }
 
 async function addProductCustom() {
@@ -1124,49 +1205,6 @@ async function addProductCustom() {
     document.getElementById('inv-stock').value = '5';
     document.getElementById('inv-stock-min').value = '2';
     
-    renderAll();
-  }
-}
-
-// NUEVA FUNCIÓN PARA EDITAR/GUARDAR CAMBIOS DE UN PRODUCTO EXISTENTE
-async function guardarCambiosProducto(id) {
-  const nombreInput = document.getElementById(`edit-nombre-${id}`).value.trim();
-  const costoInput = parseFloat(document.getElementById(`edit-costo-${id}`).value) || 0;
-  const precioInput = parseFloat(document.getElementById(`edit-precio-${id}`).value) || 0;
-  const stockInput = parseInt(document.getElementById(`edit-stock-${id}`).value) || 0;
-  const stockMinInput = parseInt(document.getElementById(`edit-stockmin-${id}`).value) || 1;
-
-  if(!nombreInput) {
-    showToast('El nombre no puede estar vacío.');
-    return;
-  }
-
-  // Actualizar en Supabase
-  const { error } = await _supabase
-    .from('productos')
-    .update({ 
-      nombre: nombreInput, 
-      costo: costoInput, 
-      precio: precioInput, 
-      stock: stockInput, 
-      stock_min: stockMinInput 
-    })
-    .eq('id', id);
-
-  if(error) {
-    console.error('Error al actualizar en Supabase:', error);
-    showToast('Error al actualizar el producto en la nube.');
-  } else {
-    // Actualizar en el arreglo local
-    const prod = inventario.find(i => i.id === id);
-    if(prod) {
-      prod.nombre = nombreInput;
-      prod.costo = costoInput;
-      prod.precio = precioInput;
-      prod.stock = stockInput;
-      prod.stockMin = stockMinInput;
-    }
-    showToast('¡Producto actualizado con éxito!');
     renderAll();
   }
 }
@@ -1265,7 +1303,13 @@ async function registerSale() {
   if(ticketActual.length === 0) { showToast('El ticket está vacío'); return; }
 
   const total = ticketActual.reduce((acc, i) => acc + (i.precio * i.cant), 0);
-  const medio = document.getElementById('venta-medio-pago').value;
+  let medio = document.getElementById('venta-medio-pago').value;
+  let cuotasSeleccionadas = '-';
+
+  if(medio === 'Cuotas') {
+    cuotasSeleccionadas = document.getElementById('cuotas-cantidad-select').value;
+    medio = 'Tarjetas / Crédito';
+  }
 
   if(medio === 'Mixto') {
     const m1 = parseFloat(document.getElementById('mixto-monto-1').value) || 0;
@@ -1288,6 +1332,7 @@ async function registerSale() {
     fecha: new Date().toISOString(),
     total,
     medio,
+    cuotas: cuotasSeleccionadas,
     items: JSON.stringify(ticketActual)
   };
   
@@ -1298,6 +1343,7 @@ async function registerSale() {
     fecha: new Date(),
     total,
     medio,
+    cuotas: cuotasSeleccionadas,
     items: [...ticketActual]
   });
 
@@ -1317,10 +1363,11 @@ async function anularVenta(id){
 function sacarEfectivoCaja(){
   const monto = parseFloat(document.getElementById('caja-monto').value) || 0;
   const motivo = document.getElementById('caja-motivo').value.trim();
+  const medio = document.getElementById('caja-medio-pago').value;
 
   if(monto <= 0 || !motivo) { showToast('Ingresa un monto válido y un motivo'); return; }
 
-  gastosCaja.push({ id: Date.now(), fecha: new Date(), monto, motivo });
+  gastosCaja.push({ id: Date.now(), fecha: new Date(), monto, motivo, medio });
 
   document.getElementById('caja-monto').value = '';
   document.getElementById('caja-motivo').value = '';
@@ -1505,13 +1552,17 @@ const mesesNombres = [
 
 function renderMonthsGrid(){
   const container = document.getElementById('months-grid-container');
-  container.innerHTML = mesesNombres.map(m => `
-    <div class="month-box" onclick="abrirModalMes('${m.num}', '${m.name}')">
-      <div class="month-box-title">${m.name} 2026</div>
-      <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px;">Total Acumulado</div>
-      <div class="month-box-stat">$0</div>
-    </div>
-  `).join('');
+  container.innerHTML = mesesNombres.map(m => {
+    const mesNum = parseInt(m.num) - 1;
+    const totalMes = ventas.filter(v => new Date(v.fecha).getMonth() === mesNum && new Date(v.fecha).getFullYear() === new Date().getFullYear()).reduce((acc, v) => acc + v.total, 0);
+    return `
+      <div class="month-box" onclick="abrirModalMes('${m.num}', '${m.name}')">
+        <div class="month-box-title">${m.name} 2026</div>
+        <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px;">Total Acumulado</div>
+        <div class="month-box-stat">$${totalMes.toLocaleString()}</div>
+      </div>
+    `;
+  }).join('');
 }
 
 function abrirModalMes(mesNum, mesNombre){
@@ -1530,14 +1581,21 @@ function abrirModalMes(mesNum, mesNombre){
       btn.classList.add('active');
       document.getElementById('modal-dia-subtitulo').textContent = `Ventas del Día ${i} de ${mesNombre}`;
       
-      const ventasDia = ventas.filter(v => new Date(v.fecha).getDate() === i);
+      const mesIndex = parseInt(mesNum) - 1;
+      const ventasDia = ventas.filter(v => {
+        const d = new Date(v.fecha);
+        return d.getDate() === i && d.getMonth() === mesIndex;
+      });
       const tablaContainer = document.getElementById('reporte-ventas-tabla');
       
       if(ventasDia.length === 0){
         tablaContainer.innerHTML = '<div class="empty">No hay ventas registradas para este día.</div>';
       } else {
-        tablaContainer.innerHTML = `<table><thead><tr><th>Hora</th><th>Medio</th><th class="num">Total</th></tr></thead><tbody>` +
-          ventasDia.map(v => `<tr><td>${new Date(v.fecha).toLocaleTimeString()}</td><td><span class="badge ok">${v.medio}</span></td><td class="num">$${v.total.toLocaleString()}</td></tr>`).join('') +
+        tablaContainer.innerHTML = `<table><thead><tr><th>Productos</th><th>Medio</th><th>Cuotas</th><th class="num">Total</th></tr></thead><tbody>` +
+          ventasDia.map(v => {
+            const listaProd = v.items.map(it => `${it.nombre} (x${it.cant})`).join(', ');
+            return `<tr><td>${listaProd}</td><td><span class="badge ok">${v.medio}</span></td><td>${v.cuotas || '-'}</td><td class="num">$${v.total.toLocaleString()}</td></tr>`;
+          }).join('') +
           `</tbody></table>`;
       }
     };
@@ -1552,21 +1610,17 @@ function cerrarModalMes(){
 function renderAll() {
   const tbodyInv = document.getElementById('tabla-inventario');
   if(inventario.length === 0) {
-    tbodyInv.innerHTML = '<tr><td colspan="7" class="empty">No hay productos en el inventario</td></tr>';
+    tbodyInv.innerHTML = '<tr><td colspan="6" class="empty">No hay productos en el inventario</td></tr>';
   } else {
-    // AQUÍ SE CONVIERTEN LAS CELDAS EN INPUTS PARA PODER EDITAR NOMBRE, PRECIOS Y STOCK
     tbodyInv.innerHTML = inventario.map(item => {
       const isLow = item.stock <= item.stockMin;
       return `<tr>
-        <td><input type="text" id="edit-nombre-${item.id}" value="${item.nombre}" style="padding: 6px; font-weight: 500;"></td>
-        <td class="num"><input type="number" id="edit-costo-${item.id}" value="${item.costo || 0}" style="padding: 6px; width: 90px; text-align: right;"></td>
-        <td class="num"><input type="number" id="edit-precio-${item.id}" value="${item.precio}" style="padding: 6px; width: 90px; text-align: right;"></td>
-        <td class="num"><input type="number" id="edit-stock-${item.id}" value="${item.stock}" style="padding: 6px; width: 70px; text-align: right;"></td>
-        <td class="num"><input type="number" id="edit-stockmin-${item.id}" value="${item.stockMin}" style="padding: 6px; width: 60px; text-align: right;"></td>
-        <td><span class="badge ${isLow ? 'low' : 'ok'}">${isLow ? 'Bajo Stock' : 'Normal'}</span></td>
-        <td style="text-align: center;">
-          <button class="btn-primary btn-sm" onclick="guardarCambiosProducto(${item.id})">Guardar</button>
-        </td>
+        <td><strong>${item.nombre}</strong></td>
+        <td class="num">$${(item.costo || 0).toLocaleString()}</td>
+        <td class="num">$${item.precio.toLocaleString()}</td>
+        <td class="num">${item.stock}</td>
+        <td class="num">${item.stockMin}</td>
+        <td><span class="badge ${isLow ? 'low' : 'ok'}">${isLow ? 'Stock Bajo' : 'Normal'}</span></td>
       </tr>`;
     }).join('');
   }
@@ -1607,55 +1661,72 @@ function renderAll() {
 
   const tablaHistorial = document.getElementById('tabla-historial-ventas');
   if(ventas.length === 0) {
-    tablaHistorial.innerHTML = '<tr><td colspan="4" class="empty">No hay ventas registradas</td></tr>';
+    tablaHistorial.innerHTML = '<tr><td colspan="6" class="empty">No hay ventas registradas</td></tr>';
   } else {
-    tablaHistorial.innerHTML = ventas.map(v => `
-      <tr>
-        <td>${new Date(v.fecha).toLocaleTimeString()} (${new Date(v.fecha).toLocaleDateString()})</td>
-        <td><span class="badge ok">${v.medio}</span></td>
-        <td class="num">$${v.total.toLocaleString()}</td>
-        <td style="text-align: center;"><button class="btn-danger btn-sm" onclick="anularVenta(${v.id})">Anular</button></td>
-      </tr>
-    `).join('');
+    tablaHistorial.innerHTML = ventas.map(v => {
+      const fechaStr = new Date(v.fecha).toLocaleDateString();
+      const productosStr = v.items.map(i => `${i.nombre} (x${i.cant})`).join(', ');
+      return `
+        <tr>
+          <td>${fechaStr}</td>
+          <td><strong>${productosStr}</strong></td>
+          <td><span class="badge ok">${v.medio}</span></td>
+          <td>${v.cuotas || '-'}</td>
+          <td class="num">$${v.total.toLocaleString()}</td>
+          <td style="text-align: center;"><button class="btn-danger btn-sm" onclick="anularVenta(${v.id})">Anular</button></td>
+        </tr>
+      `;
+    }).join('');
   }
 
   const totalHistorico = ventas.reduce((acc, v) => acc + v.total, 0);
   const ventasHoyTotal = ventas.filter(v => new Date(v.fecha).toDateString() === new Date().toDateString()).reduce((acc, v) => acc + v.total, 0);
   
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const ventasMesTotal = ventas.filter(v => {
+    const d = new Date(v.fecha);
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  }).reduce((acc, v) => acc + v.total, 0);
+  
   const ventasHoyNeto = ventas.filter(v => new Date(v.fecha).toDateString() === new Date().toDateString()).reduce((acc, v) => {
     let comision = 0;
     if (v.medio === 'Débito') comision = v.total * 0.0121;
-    else if (v.medio === 'Crédito') comision = v.total * 0.0242;
+    else if (v.medio === 'Santander') comision = v.total * 0.0242;
+    else if (v.medio === 'TotalCoin') comision = v.total * 0.0325;
     return acc + (v.total - comision);
   }, 0);
 
-  const totalRetiros = gastosCaja.reduce((acc, g) => acc + g.monto, 0);
-  const efectivoEnCaja = (ventas.filter(v => v.medio === 'Efectivo').reduce((acc, v) => acc + v.total, 0)) - totalRetiros;
+  const totalRetirosEfectivo = gastosCaja.filter(g => g.medio === 'Efectivo').reduce((acc, g) => acc + g.monto, 0);
+  const totalRetirosGeneral = gastosCaja.reduce((acc, g) => acc + g.monto, 0);
+  
+  const efectivoEnCaja = (ventas.filter(v => v.medio === 'Efectivo').reduce((acc, v) => acc + v.total, 0)) - totalRetirosEfectivo;
 
   document.getElementById('dash-venta-total').textContent = `$${totalHistorico.toLocaleString()}`;
   document.getElementById('dash-venta-diaria').textContent = `$${ventasHoyTotal.toLocaleString()}`;
-  document.getElementById('dash-venta-mes').textContent = `$${ventasHoyTotal.toLocaleString()}`;
+  document.getElementById('dash-venta-mes').textContent = `$${ventasMesTotal.toLocaleString()}`;
   document.getElementById('dash-bajo-stock').textContent = itemsBajoStock.length;
 
   document.getElementById('stat-ventas-hoy').textContent = `$${ventasHoyTotal.toLocaleString()}`;
   document.getElementById('stat-ventas-hoy-neto').textContent = `$${ventasHoyNeto.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-  document.getElementById('stat-ventas-mes').textContent = `$${ventasHoyTotal.toLocaleString()}`;
+  document.getElementById('stat-ventas-mes').textContent = `$${ventasMesTotal.toLocaleString()}`;
 
   document.getElementById('caja-stat-saldo').textContent = `$${efectivoEnCaja.toLocaleString()}`;
-  document.getElementById('caja-stat-retiros').textContent = `$${totalRetiros.toLocaleString()}`;
-  document.getElementById('caja-stat-gastos-mes').textContent = `$${totalRetiros.toLocaleString()}`;
+  document.getElementById('caja-stat-retiros').textContent = `$${totalRetirosGeneral.toLocaleString()}`;
+  document.getElementById('caja-stat-gastos-mes').textContent = `$${totalRetirosGeneral.toLocaleString()}`;
 
   document.getElementById('cierre-efectivo-box').textContent = `$${efectivoEnCaja.toLocaleString()}`;
-  document.getElementById('cierre-gastos-box').textContent = `$${totalRetiros.toLocaleString()}`;
+  document.getElementById('cierre-gastos-box').textContent = `$${totalRetirosGeneral.toLocaleString()}`;
 
   const tablaGastosCierre = document.getElementById('tabla-cierre-gastos');
   if(gastosCaja.length === 0){
-    tablaGastosCierre.innerHTML = '<tr><td colspan="3" class="empty">No hay gastos o retiros registrados en el mes</td></tr>';
+    tablaGastosCierre.innerHTML = '<tr><td colspan="4" class="empty">No hay gastos o retiros registrados en el mes</td></tr>';
   } else {
     tablaGastosCierre.innerHTML = gastosCaja.map(g => `
       <tr>
         <td>${new Date(g.fecha).toLocaleDateString()} ${new Date(g.fecha).toLocaleTimeString()}</td>
         <td><strong>${g.motivo}</strong></td>
+        <td><span class="badge ${g.medio === 'Efectivo' ? 'ok' : 'whatsapp'}">${g.medio || 'Efectivo'}</span></td>
         <td class="num" style="color:var(--red); font-weight:700;">-$${g.monto.toLocaleString()}</td>
       </tr>
     `).join('');
@@ -1664,12 +1735,14 @@ function renderAll() {
   const efec = ventas.filter(v => v.medio === 'Efectivo').reduce((acc, v) => acc + v.total, 0);
   const trans = ventas.filter(v => v.medio === 'Transferencia').reduce((acc, v) => acc + v.total, 0);
   const qr = ventas.filter(v => v.medio === 'QR').reduce((acc, v) => acc + v.total, 0);
-  const tarj = ventas.filter(v => v.medio === 'Débito' || v.medio === 'Crédito' || v.medio === 'Mixto').reduce((acc, v) => acc + v.total, 0);
+  const tarj = ventas.filter(v => v.medio === 'Débito' || v.medio === 'Santander' || v.medio === 'TotalCoin' || v.medio === 'PICS' || v.medio === 'Mixto').reduce((acc, v) => acc + v.total, 0);
 
   document.getElementById('dash-medio-efectivo').textContent = `$${efec.toLocaleString()}`;
   document.getElementById('dash-medio-transferencia').textContent = `$${trans.toLocaleString()}`;
   document.getElementById('dash-medio-qr').textContent = `$${qr.toLocaleString()}`;
   document.getElementById('dash-medio-tarjeta').textContent = `$${tarj.toLocaleString()}`;
+  
+  renderMonthsGrid();
 }
 
 function showToast(msg){
