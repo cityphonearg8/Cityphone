@@ -759,10 +759,11 @@
               <th class="num">Stock Actual</th>
               <th class="num">Stock Mínimo</th>
               <th>Estado</th>
+              <th style="text-align: center;">Acciones</th>
             </tr>
           </thead>
           <tbody id="tabla-inventario">
-            <tr><td colspan="6" class="empty">No hay productos en el inventario</td></tr>
+            <tr><td colspan="7" class="empty">No hay productos en el inventario</td></tr>
           </tbody>
         </table>
       </div>
@@ -1213,6 +1214,64 @@ async function addProductCustom() {
   }
 }
 
+// Funciones para Editar y Dar de Baja Productos del Inventario
+async function guardarEdicionInventario(id) {
+  const row = document.getElementById(`inv-row-${id}`);
+  if(!row) return;
+
+  const nombre = row.querySelector('.edit-nombre').value.trim();
+  const costo = parseFloat(row.querySelector('.edit-costo').value) || 0;
+  const precio = parseFloat(row.querySelector('.edit-precio').value) || 0;
+  const stock = parseInt(row.querySelector('.edit-stock').value) || 0;
+  const stockMin = parseInt(row.querySelector('.edit-stock-min').value) || 0;
+
+  if(!nombre) {
+    showToast('El nombre no puede estar vacío');
+    return;
+  }
+
+  // Actualizar en Supabase
+  const { error } = await _supabase
+    .from('productos')
+    .update({ nombre, costo, precio, stock, stock_min: stockMin })
+    .eq('id', id);
+
+  if(error) {
+    console.error('Error al actualizar en Supabase:', error);
+    showToast('Error al actualizar en la nube');
+  } else {
+    // Actualizar en el arreglo local
+    const item = inventario.find(i => i.id === id);
+    if(item) {
+      item.nombre = nombre;
+      item.costo = costo;
+      item.precio = precio;
+      item.stock = stock;
+      item.stockMin = stockMin;
+    }
+    showToast('¡Producto actualizado con éxito!');
+    renderAll();
+  }
+}
+
+async function noTrabajarMasProducto(id) {
+  if(!confirm('¿Estás segura de que NO trabajarán más este producto? Se eliminará del inventario.')) return;
+
+  const { error } = await _supabase
+    .from('productos')
+    .delete()
+    .eq('id', id);
+
+  if(error) {
+    console.error('Error al eliminar de Supabase:', error);
+    showToast('Error al eliminar producto');
+  } else {
+    inventario = inventario.filter(i => i.id !== id);
+    showToast('Producto dado de baja (ya no se trabajará más)');
+    renderAll();
+  }
+}
+
 function addFalladoProduct() {
   const nombre = document.getElementById('fallado-nombre').value.trim();
   const costo = parseFloat(document.getElementById('fallado-costo').value) || 0;
@@ -1620,17 +1679,21 @@ function cerrarModalMes(){
 function renderAll() {
   const tbodyInv = document.getElementById('tabla-inventario');
   if(inventario.length === 0) {
-    tbodyInv.innerHTML = '<tr><td colspan="6" class="empty">No hay productos en el inventario</td></tr>';
+    tbodyInv.innerHTML = '<tr><td colspan="7" class="empty">No hay productos en el inventario</td></tr>';
   } else {
     tbodyInv.innerHTML = inventario.map(item => {
       const isLow = item.stock <= item.stockMin;
-      return `<tr>
-        <td><strong>${item.nombre}</strong></td>
-        <td class="num">$${(item.costo || 0).toLocaleString()}</td>
-        <td class="num">$${item.precio.toLocaleString()}</td>
-        <td class="num">${item.stock}</td>
-        <td class="num">${item.stockMin}</td>
+      return `<tr id="inv-row-${item.id}">
+        <td><input type="text" class="edit-nombre" value="${item.nombre}" style="padding: 6px; font-size: 13px;"></td>
+        <td class="num"><input type="number" class="edit-costo" value="${item.costo || 0}" style="padding: 6px; font-size: 13px; width: 90px; text-align: right;"></td>
+        <td class="num"><input type="number" class="edit-precio" value="${item.precio}" style="padding: 6px; font-size: 13px; width: 90px; text-align: right;"></td>
+        <td class="num"><input type="number" class="edit-stock" value="${item.stock}" style="padding: 6px; font-size: 13px; width: 70px; text-align: right;"></td>
+        <td class="num"><input type="number" class="edit-stock-min" value="${item.stockMin}" style="padding: 6px; font-size: 13px; width: 70px; text-align: right;"></td>
         <td><span class="badge ${isLow ? 'low' : 'ok'}">${isLow ? 'Stock Bajo' : 'Normal'}</span></td>
+        <td style="text-align: center; white-space: nowrap;">
+          <button class="btn-primary btn-sm" onclick="guardarEdicionInventario(${item.id})">Guardar</button>
+          <button class="btn-danger btn-sm" onclick="noTrabajarMasProducto(${item.id})">No trabajaremos más</button>
+        </td>
       </tr>`;
     }).join('');
   }
