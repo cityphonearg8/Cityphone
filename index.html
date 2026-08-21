@@ -817,6 +817,7 @@
           <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
             <div class="field"><label>Nombre</label><input id="srv-nombre" placeholder="Nombre cliente"></div>
             <div class="field"><label>Apellido</label><input id="srv-apellido" placeholder="Apellido cliente"></div>
+            <div class="field"><label>Modelo</label><input id="srv-modelo" placeholder="Ej: iPhone 13 / Samsung A54"></div>
             <div class="field"><label>Teléfono / WhatsApp</label><input id="srv-telefono" placeholder="Ej: 1123456789"></div>
             <div class="field"><label>Correo Electrónico</label><input id="srv-email" type="email" placeholder="correo@domain.com"></div>
             <div class="field" style="grid-column: span 2;"><label>Motivo de ingreso (Reparación / Falla)</label><input id="srv-motivo" placeholder="Ej: Cambio de módulo / Pin de carga roto"></div>
@@ -831,6 +832,7 @@
             <thead>
               <tr>
                 <th>Cliente</th>
+                <th>Modelo</th>
                 <th>Contacto</th>
                 <th>Motivo</th>
                 <th class="num">Precio</th>
@@ -840,7 +842,7 @@
               </tr>
             </thead>
             <tbody id="tabla-servicios-ingreso">
-              <tr><td colspan="7" class="empty">No hay equipos ingresados</td></tr>
+              <tr><td colspan="8" class="empty">No hay equipos ingresados</td></tr>
             </tbody>
           </table>
         </div>
@@ -852,6 +854,7 @@
           <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
             <div class="field"><label>Nombre</label><input id="cot-nombre" placeholder="Nombre cliente"></div>
             <div class="field"><label>Apellido</label><input id="cot-apellido" placeholder="Apellido cliente"></div>
+            <div class="field"><label>Modelo</label><input id="cot-modelo" placeholder="Ej: iPhone 13 / Moto G54"></div>
             <div class="field"><label>Teléfono / WhatsApp</label><input id="cot-telefono" placeholder="Ej: 1123456789"></div>
             <div class="field"><label>Correo Electrónico</label><input id="cot-email" type="email" placeholder="correo@domain.com"></div>
             <div class="field" style="grid-column: span 2;"><label>Detalle de la Cotización</label><input id="cot-motivo" placeholder="Ej: Presupuesto cambio de pantalla iPhone 13"></div>
@@ -866,6 +869,7 @@
             <thead>
               <tr>
                 <th>Cliente</th>
+                <th>Modelo</th>
                 <th>Contacto</th>
                 <th>Detalle</th>
                 <th class="num">Presupuesto</th>
@@ -874,7 +878,7 @@
               </tr>
             </thead>
             <tbody id="tabla-servicios-cotizacion">
-              <tr><td colspan="6" class="empty">No hay cotizaciones registradas</td></tr>
+              <tr><td colspan="7" class="empty">No hay cotizaciones registradas</td></tr>
             </tbody>
           </table>
         </div>
@@ -1387,6 +1391,7 @@ function cerrarModalCierreMes() {
 function addServiceIngreso(){
   const nombre = document.getElementById('srv-nombre').value.trim();
   const apellido = document.getElementById('srv-apellido').value.trim();
+  const modelo = document.getElementById('srv-modelo').value.trim();
   const telefono = document.getElementById('srv-telefono').value.trim();
   const email = document.getElementById('srv-email').value.trim();
   const motivo = document.getElementById('srv-motivo').value.trim();
@@ -1394,10 +1399,11 @@ function addServiceIngreso(){
 
   if(!nombre || !motivo) { showToast('Completa al menos el nombre y el motivo'); return; }
 
-  servicioIngresos.push({ id: Date.now(), nombre, apellido, telefono, email, motivo, precio, estado: 'Ingresado' });
+  servicioIngresos.push({ id: Date.now(), nombre, apellido, modelo, telefono, email, motivo, precio, estado: 'Ingresado' });
 
   document.getElementById('srv-nombre').value = '';
   document.getElementById('srv-apellido').value = '';
+  document.getElementById('srv-modelo').value = '';
   document.getElementById('srv-telefono').value = '';
   document.getElementById('srv-email').value = '';
   document.getElementById('srv-motivo').value = '';
@@ -1410,6 +1416,7 @@ function addServiceIngreso(){
 function addCotizacion(){
   const nombre = document.getElementById('cot-nombre').value.trim();
   const apellido = document.getElementById('cot-apellido').value.trim();
+  const modelo = document.getElementById('cot-modelo').value.trim();
   const telefono = document.getElementById('cot-telefono').value.trim();
   const email = document.getElementById('cot-email').value.trim();
   const motivo = document.getElementById('cot-motivo').value.trim();
@@ -1417,10 +1424,11 @@ function addCotizacion(){
 
   if(!nombre || !motivo) { showToast('Completa al menos el nombre y el detalle'); return; }
 
-  servicioCotizaciones.push({ id: Date.now(), nombre, apellido, telefono, email, motivo, precio });
+  servicioCotizaciones.push({ id: Date.now(), nombre, apellido, modelo, telefono, email, motivo, precio });
 
   document.getElementById('cot-nombre').value = '';
   document.getElementById('cot-apellido').value = '';
+  document.getElementById('cot-modelo').value = '';
   document.getElementById('cot-telefono').value = '';
   document.getElementById('cot-email').value = '';
   document.getElementById('cot-motivo').value = '';
@@ -1457,8 +1465,8 @@ function enviarWhatsAppServicio(tipo, id){
   if(!item) return;
 
   const msg = tipo === 'ingreso'
-    ? `Hola *${item.nombre} ${item.apellido}*! Desde *City Phone* te escribimos para informarte el estado actual de tu equipo. Estado: *${item.estado}*. Motivo: ${item.motivo}. Costo total: $${item.precio.toLocaleString()}. ¡Cualquier duda estamos a disposición!`
-    : `Hola *${item.nombre} ${item.apellido}*! Desde *City Phone* te enviamos tu cotización solicitada. Detalle: ${item.motivo}. Presupuesto: $${item.precio.toLocaleString()}. ¡Esperamos tu confirmación!`;
+    ? `Hola *${item.nombre} ${item.apellido}*! Desde *City Phone* te escribimos para informarte el estado actual de tu equipo (${item.modelo || 'Equipo'}). Estado: *${item.estado}*. Motivo: ${item.motivo}. Costo total: $${item.precio.toLocaleString()}. ¡Cualquier duda estamos a disposición!`
+    : `Hola *${item.nombre} ${item.apellido}*! Desde *City Phone* te enviamos tu cotización solicitada para el modelo *${item.modelo || 'Equipo'}*. Detalle: ${item.motivo}. Presupuesto: $${item.precio.toLocaleString()}. ¡Esperamos tu confirmación!`;
 
   const url = `https://api.whatsapp.com/send?phone=${item.telefono}&text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
@@ -1467,11 +1475,12 @@ function enviarWhatsAppServicio(tipo, id){
 function renderServiciosTecnicos(){
   const tbodyIng = document.getElementById('tabla-servicios-ingreso');
   if(servicioIngresos.length === 0){
-    tbodyIng.innerHTML = '<tr><td colspan="7" class="empty">No hay equipos ingresados</td></tr>';
+    tbodyIng.innerHTML = '<tr><td colspan="8" class="empty">No hay equipos ingresados</td></tr>';
   } else {
     tbodyIng.innerHTML = servicioIngresos.map(i => `
       <tr>
         <td><strong>${i.nombre} ${i.apellido}</strong></td>
+        <td>${i.modelo || '-'}</td>
         <td>${i.telefono}<br><small style="color:var(--muted);">${i.email}</small></td>
         <td>${i.motivo}</td>
         <td class="num">$${i.precio.toLocaleString()}</td>
@@ -1491,11 +1500,12 @@ function renderServiciosTecnicos(){
 
   const tbodyCot = document.getElementById('tabla-servicios-cotizacion');
   if(servicioCotizaciones.length === 0){
-    tbodyCot.innerHTML = '<tr><td colspan="6" class="empty">No hay cotizaciones registradas</td></tr>';
+    tbodyCot.innerHTML = '<tr><td colspan="7" class="empty">No hay cotizaciones registradas</td></tr>';
   } else {
     tbodyCot.innerHTML = servicioCotizaciones.map(i => `
       <tr>
         <td><strong>${i.nombre} ${i.apellido}</strong></td>
+        <td>${i.modelo || '-'}</td>
         <td>${i.telefono}<br><small style="color:var(--muted);">${i.email}</small></td>
         <td>${i.motivo}</td>
         <td class="num">$${i.precio.toLocaleString()}</td>
