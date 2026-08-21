@@ -1824,6 +1824,17 @@ function showToast(msg){
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), 2200);
 }
+
+  import { createClient } from '@supabase/supabase-js'
+
+// Reemplazá estos datos con los de tu proyecto de Supabase 
+// (los sacás de Project Settings > API en tu panel de Supabase)
+const SUPABASE_URL = 'TU_URL_DE_SUPABASE'
+const SUPABASE_ANON_KEY = 'TU_CLAVE_ANON_PUBLICA'
+
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+  
 </script>
 </body>
 </html>
